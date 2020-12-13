@@ -160,6 +160,7 @@ plot.line_graph <- reactiveValues(out = NULL)
 
 observe({
   output$line_graph <- renderPlotly({
+    req(length(unique(dt_visualisation$df_document_vector_modele_date$date))>1)
     plotly_line_graph(dt_visualisation$df_label_modele_cluster, dt_visualisation$df_document_vector_modele_date, dt_visualisation$myColors)
-    })
+      })
 }, priority = 0)

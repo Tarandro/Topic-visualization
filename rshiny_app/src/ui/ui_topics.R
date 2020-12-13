@@ -104,51 +104,6 @@ tabItem(
              actionButton("bouton_retour", "Retour liste des thèmes")
     ),
     
-    tabPanel("NMF_topic", 
-             fluidRow(
-               column(3,
-                      pickerInput("Choix_themes_nmf", "Thème", as.vector(df_label[which(df_label$modele==as.vector(unique(top_topic_terms$modele))[1] & df_label$choix==1),]$label),
-                                  selected = as.vector(df_label[which(df_label$modele==as.vector(unique(top_topic_terms$modele))[1] & df_label$choix==1),]$label[1]), 
-                                  options = list(`actions-box` = TRUE))
-               ),
-               column(3, 
-                      numericInput("k_topics", 
-                                   h4("Nombre de topics :"), 
-                                   value = 10)
-               )
-             ),
-             fluidRow(
-               column(1),
-               column(2,
-                      actionButton("nmf", "Lancer NMF")
-               ),
-               column(3),
-               column(2,
-                      actionButton("change_topic", "Changement topics")
-               )
-             ),
-             br(),
-             fluidRow(
-               column(6,
-                      h4(p(textOutput("info_nmf"),style="color:black"))
-                ),
-             ),
-             box(title = "Thèmes et top termes",
-                 width = 12,
-                 solidHeader = TRUE,
-                 status = "primary", 
-                 tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: purple}")),
-              fluidRow(
-                   tags$head(
-                     tags$script('
-                        Shiny.addCustomMessageHandler("unbinding_table_elements", function(x) {                
-                        Shiny.unbindAll($(document.getElementById(x)).find(".dataTable"));
-                        });')
-                     ) ),
-             DT::dataTableOutput('table_topics_nmf')
-             )
-    ),
-    
     tabPanel("Assembler_topic",
              box(title = "similarité 1",
                  width = 12,

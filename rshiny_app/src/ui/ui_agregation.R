@@ -23,9 +23,7 @@ tabItem(
                       column(
                         p(htmlOutput("informations_metrique"),style="color:black"),
                         br(),
-                        p("Lors de l'agrégation, toutes les paires de thèmes (matrice X) avec une similarité supérieure au Seuil_1 sont assemblées ensemble 
-                          et les thèmes (matrice Y) avec une similarité entre documents inférieure au Seuil_2 sont assemblés avec le thème qui leur est le plus similaire. 
-                          Ensuite, on obtient la fonction de perte suivante :",style="text-align:left"),
+                        p("...",style="text-align:left"),
                         uiOutput("fct_perte",style="text-align:center;color:black;border:1px solid black;background-color:white"),
                         br(),
                         width=8,style="background-color:lavender;border-radius: 10px")),
@@ -36,16 +34,5 @@ tabItem(
                    solidHeader = TRUE,
                    status = "primary",
                    plotlyOutput("sim_topics_after")
-                    ),
-            fluidRow(
-                box(title = "Y : Matrice de similarité entre top termes des thèmes", width=6, height = 750,
-                    solidHeader = TRUE, status = "primary",
-                    plotlyOutput("sim_termes_after")
-                ),
-               box(title = "Matrice de similarité entre documents des thèmes", width=6,  height = 750,
-                   solidHeader = TRUE, status = "primary",
-                   plotlyOutput("sim_docs_after")
-                   )
-              
-             )
+                    )
   )

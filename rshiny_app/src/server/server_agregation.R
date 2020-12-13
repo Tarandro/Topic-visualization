@@ -28,12 +28,6 @@ print_informations = function(data_infos, data_docs){
   message = paste("Nombre de topics avant agrégation :", nb_topic_before_agg)
   
   message = paste(message,'&emsp;&emsp;',"Nombre de topics après agrégation :", length(unique(data_docs$cluster)),'<br/>')
-  
-  seuil_1 = round(data_infos[which(data_infos$infos=='seuil_1'),]$value,2)
-  seuil_2 = round(data_infos[which(data_infos$infos=='seuil_2'),]$value,2)
-  beta = round(data_infos[which(data_infos$infos=='beta'),]$value,2)
-  message = paste(message,'Seuil_1 =',seuil_1[1],'&emsp;&emsp;','Seuil_2 =',seuil_2[1],'&emsp;&emsp;','\\(\\beta\\) =',beta)
-  
   return(HTML(message))
 }
 
@@ -46,7 +40,7 @@ output$informations_metrique <- renderText({
 output$fct_perte <- renderUI({
   data_infos = dt_agregation$df_informations_modele
   score = as.character(round(data_infos[which(data_infos$infos=='loss_fct'),]$value,3))
-  withMathJax(paste('$$Fonction~de~perte = \\beta * \\frac{1}{m^{2}} \\sum_{i=1}^{m}\\sum_{j=1}^{m} X_{i,j} + (1-\\beta)*(1 - \\frac{1}{m} \\sum_{i=1}^{m} Y_{i}) =',score,'$$'))
+  withMathJax(paste('$$Fonction~de~perte =  ... =',score,'$$'))
 })
 
 ########################################################################################
@@ -90,73 +84,5 @@ plot.sim_topics <- reactiveValues(out = NULL)
 observe({
 output$sim_topics_after <- renderPlotly({
   plotly_sim_topics(dt_agregation$label_df_modele_choix)
-  })
-}, priority = 1)
-
-########################################################################################
-
-plotly_sim_termes= function(label_df, sim_termes){
-  "Affiche la matrice Y : un coefficient correspond à la similarité entre les tops termes d'un topic"
-  
-  labels = label_df[order(label_df$cluster),]$label
-  
-  sim_termes = sim_termes[order(sim_termes$cluster),]$sim
-  
-  fig <- plot_ly(
-    x = c('1'), y = labels,
-    z = as.matrix(sim_termes),
-    colorscale='Viridis',
-    reversescale =T, type = "heatmap", width = 700, height = 650
-  )%>% 
-    colorbar(title = 'Similarité')%>%
-    add_annotations(x=rep('1',length(labels))
-                    ,y=labels
-                    ,text=round(sim_termes,2)
-                    ,showarrow=FALSE
-                    ,align="center")%>%
-    layout(yaxis=list(tickvals = labels)
-           ,xaxis=list(visible=FALSE)
-    )
-  return(fig)
-}
-
-observe({
-  output$sim_termes_after <- renderPlotly({
-    plotly_sim_termes(dt_agregation$label_df_modele_choix, dt_agregation$df_sim_terme_topic_modele)
-  })
-}, priority = 1)
-
-########################################################################################
-
-plotly_sim_docs= function(label_df, sim_docs){
-  "Affiche la matrice Y calculé avec la similarité des docs : un coefficient correspond à la similarité entre les documents d'un topic"
-  
-  labels = label_df[order(label_df$cluster),]$label
-  
-  sim_docs = sim_docs[order(sim_docs$cluster),]$sim
-  
-  fig <- plot_ly(
-    x = c('1'), y = labels,
-    z = as.matrix(sim_docs),
-    colorscale='Viridis',
-    reversescale =T, type = "heatmap", width = 700, height = 650
-  )%>% 
-    colorbar(title = 'Similarité')%>%
-    add_annotations(x=rep('1',length(labels))
-                    ,y=labels
-                    ,text=round(sim_docs,2)
-                    ,showarrow=FALSE
-                    ,align="center")%>%
-    layout(yaxis=list(tickvals = labels)
-           ,xaxis=list(visible=FALSE)
-    )
-  return(fig)
-}
-
-plot.sim_docs <- reactiveValues(out = NULL)
-
-observe({
-output$sim_docs_after <- renderPlotly({
-  plotly_sim_docs(dt_agregation$label_df_modele_choix, dt_agregation$df_sim_doc_topic_modele)
   })
 }, priority = 1)
