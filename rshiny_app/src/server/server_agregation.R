@@ -5,14 +5,12 @@ dt_agregation = reactiveValues(label_df_modele_choix = NULL, df_sim_terme_topic_
 observeEvent({
   input$Choix_modele_agreg
   input$boutons_label
-  input$change_topic
-  assembler()}, {
+  input$change_topic}, {
   dt_agregation$label_df_modele_choix = subset(dt_topics$label_df_choix, modele == input$Choix_modele_agreg)
 }, priority = 2,ignoreNULL = FALSE,ignoreInit = FALSE)
 
 observeEvent({input$Choix_modele_agreg
-  input$change_topic
-  assembler()}, {
+  input$change_topic}, {
   dt_agregation$df_sim_doc_topic_modele = subset(datas$df_sim_doc_topic, modele == input$Choix_modele_agreg)
   dt_agregation$df_sim_terme_topic_modele = subset(datas$df_sim_terme_topic, modele == input$Choix_modele_agreg)
   dt_agregation$df_document_vector_modele = subset(datas$df_document_vector, modele == input$Choix_modele_agreg)

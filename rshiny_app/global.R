@@ -12,7 +12,7 @@ require(viridis)
 require(sqldf)
 
 
-path = '/home/gassmann/Documents/NLP-TopicModeling/data/CDP_hierar/'  # Tripadvisor_pos
+path = '~/Documents/NLP-TopicModeling/Topic-visualization/rshiny_app/CDP_hierar/'  # Tripadvisor_pos
 
 df_label = read.csv(paste0(path,'df_label','.csv'))
 top_topic_terms = read.csv(paste0(path,'top_topic_terms','.csv'))
@@ -54,9 +54,9 @@ for(modele in name_modeles){
   datas[[paste0('matrice_sim_topics_',modele)]] = readUrl(modele)
 }
 
-reticulate::use_python('/home/gassmann/anaconda3/bin/python3.8', required = T)
-library(reticulate)
-py_config()
+#reticulate::use_python('/home/gassmann/anaconda3/bin/python3.8', required = T)
+#library(reticulate)
+#py_config()
 
-source_python('/home/gassmann/PycharmProjects/NMF-script/main.py')
+#source_python('/home/gassmann/PycharmProjects/NMF-script/main.py')
 #fasttext = ft_document_vector(subset(df_document_vector, modele==df_document_vector$modele[1])$terms, 1L, 200L, 5L)

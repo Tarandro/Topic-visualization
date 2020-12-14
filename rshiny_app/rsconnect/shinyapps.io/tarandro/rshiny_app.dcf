@@ -1,0 +1,10 @@
+name: rshiny_app
+title:
+username:
+account: tarandro
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3398540
+bundleId: 3986357
+url: https://tarandro.shinyapps.io/rshiny_app/
+when: 1607942601.50421

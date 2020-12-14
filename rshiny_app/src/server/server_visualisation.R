@@ -4,8 +4,7 @@ dt_visualisation = reactiveValues(df_document_vector_modele = NULL, df_document_
 # udpate si on change de label pour un topic
 observeEvent({input$Choix_modele_viz
   input$boutons_label
-  input$change_topic
-  assembler()}, {
+  input$change_topic}, {
   dt_visualisation$label_df_modele_choix = subset(dt_topics$label_df_choix, modele == input$Choix_modele_viz)
   updatePickerInput(session, inputId ="Choix_themes_viz", choices = as.vector(dt_visualisation$label_df_modele_choix$label),
                     selected = as.vector(dt_visualisation$label_df_modele_choix$label))
@@ -13,8 +12,7 @@ observeEvent({input$Choix_modele_viz
 
 observeEvent({input$Choix_themes_viz
   input$Choix_modele_viz
-  input$change_topic
-  assembler()}, {
+  input$change_topic}, {
     
   dt_visualisation$df_label_modele_cluster = subset(dt_visualisation$label_df_modele_choix, label %in% input$Choix_themes_viz)
   subset_label = dt_visualisation$df_label_modele_cluster 

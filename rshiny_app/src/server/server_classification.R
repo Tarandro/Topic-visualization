@@ -5,8 +5,7 @@ dt_classification = reactiveValues(df_document_vector_before_modele = NULL, df_d
 # udpate si on change de label pour un topic
 observeEvent({input$Choix_modele_clas
   input$boutons_label
-  input$change_topic
-  assembler()}, {
+  input$change_topic}, {
     dt_classification$label_df_modele_choix = subset(dt_topics$label_df_choix, modele == input$Choix_modele_clas)
     
     subset_label = dt_classification$label_df_modele_choix
@@ -20,8 +19,7 @@ observeEvent({input$Choix_modele_clas
   
   
 observeEvent({input$Choix_modele_clas
-  input$change_topic
-  assembler()}, {
+  input$change_topic}, {
   df_document_vector_before_modele = subset(datas$df_document_vector_before, modele == input$Choix_modele_clas)
   dt_classification$df_document_vector_before_modele = df_document_vector_before_modele
   df_document_vector_modele = subset(datas$df_document_vector, modele == input$Choix_modele_clas)

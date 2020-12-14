@@ -7,9 +7,9 @@ dt_topics = reactiveValues(df_document_vector_modele = NULL, top_topic_terms_mod
                            df_label_modele_cluster_all_choix = NULL, label_df_choix = NULL, length_nmf = NULL, top_termes_nmf = NULL,
                            doc_topic = NULL, yolo = 0, tuples = NULL)
 
-assembler <- reactive({
-  paste(input$assembler_1,input$assembler_2,input$assembler_3,input$assembler_4)
-})
+#assembler <- reactive({
+#  paste(input$assembler_1,input$assembler_2,input$assembler_3,input$assembler_4)
+#})
 
 observeEvent(input$Choix_themes, {
   
@@ -87,8 +87,7 @@ observeEvent(input$boutons_label, {
 }, priority = 2,ignoreNULL = FALSE,ignoreInit = FALSE)
 
 observeEvent({input$Choix_modele
-  input$change_topic
-  assembler()},{
+  input$change_topic},{
 
   df_label_1 = subset(datas$df_label, modele == input$Choix_modele)
 
@@ -124,8 +123,7 @@ observeEvent(input$select_button, {
 },ignoreNULL = FALSE,ignoreInit = TRUE)
 
 # Si on change theme dans 'Documents' alors changer theme dans 'NMF_topic'
-observeEvent({input$Choix_themes
-              assembler()}, {
+observeEvent({input$Choix_themes}, {
   updatePickerInput(session = session, inputId = "Choix_themes_nmf",
                     choices = as.vector(dt_topics$label_df_modele_choix$label),
                     selected = as.vector(input$Choix_themes))
@@ -410,8 +408,7 @@ observeEvent(input$button_modele, {
   }
 },ignoreNULL = FALSE,ignoreInit = TRUE)
 
-observeEvent({input$change_topic
-  assembler()}, {
+observeEvent({input$change_topic}, {
   info_df <- reactiveValues(data = data.frame(
     
     Modèle = shinyInput(actionButton, length(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$modele), 
@@ -471,144 +468,3 @@ output$table_labels = renderDT(
   options = list(lengthChange = FALSE, pageLength = dataframe_labels(dt_topics$label_df_choix)[[2]], paging = FALSE, info = FALSE,
                  ordering = FALSE)
 )
-
-
-########################################################################################
-########################################################################################
-########################################################################################
-
-observeEvent({input$Choix_modele
-  assembler()},{
-  
-  subset_label = dt_topics$label_df_modele_choix
-  matrice_sim_topics = datas[[paste0('matrice_sim_topics_',subset_label$modele[1])]]
-  tuple_topics = top_sim_topics(matrice_sim_topics, subset_label)
-  dt_topics$tuples = tuple_topics[[1]]
-  
-  data_terms = dt_topics$top_topic_terms_modele
-  data_docs = dt_topics$df_document_vector_modele
-  
-  list_sim = list()
-  for (i in 1:4) {
-    list_df_top_termes = dataframe_topics_tuple(10, dt_topics$tuples[[i]],data_terms,data_docs,subset_label)
-    
-    list_sim[[i]] =  data.frame(
-          Label = list_df_top_termes[[1]],
-          Classement = list_df_top_termes[[2]],
-          Top_termes = list_df_top_termes[[3]],
-          stringsAsFactors = FALSE,
-          row.names = 1:2
-        )
-  }
-  
-  output$table_sim_1 = DT::renderDataTable({list_sim[[1]]},
-                                           server = FALSE, escape = FALSE, selection = 'none',
-                                           options = list(lengthChange = FALSE, paging = FALSE, info = FALSE, searching = FALSE,
-                                                          ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = 1:2))
-                                           ))
-  output$info_sim_1 <- renderText({paste0("Similarité = ",tuple_topics[[2]][[1]])})
-  output$table_sim_2 =  DT::renderDataTable({list_sim[[2]]},
-                                            server = FALSE, escape = FALSE, selection = 'none',
-                                            options = list(lengthChange = FALSE, paging = FALSE, info = FALSE, searching = FALSE,
-                                                           ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = 1:2))
-                                            ))
-  output$info_sim_2 <- renderText({paste0("Similarité = ",tuple_topics[[2]][[2]])})
-  output$table_sim_3 =  DT::renderDataTable({list_sim[[3]]},
-                                            server = FALSE, escape = FALSE, selection = 'none',
-                                            options = list(lengthChange = FALSE, paging = FALSE, info = FALSE, searching = FALSE,
-                                                           ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = 1:2))
-                                            ))
-  output$info_sim_3 <- renderText({paste0("Similarité = ",tuple_topics[[2]][[3]])})
-  output$table_sim_4 =  DT::renderDataTable({list_sim[[4]]},
-                                            server = FALSE, escape = FALSE, selection = 'none',
-                                            options = list(lengthChange = FALSE, paging = FALSE, info = FALSE, searching = FALSE,
-                                                           ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = 1:2))
-                                            ))
-  output$info_sim_4 <- renderText({paste0("Similarité = ",tuple_topics[[2]][[4]])})
-}, priority = -1,ignoreNULL = FALSE,ignoreInit = FALSE)
-
-
-dataframe_topics_tuple = function(nb_top_termes,tuple,data_terms,data_docs,label_df_choix){
-  "Affiche les tops termes de chaque topic et classe les topics selon choix_classement"
-  
-  tuple = c(tuple[[1]],tuple[[2]])
-  data_terms = subset(data_terms, cluster %in% tuple)
-  data_docs = subset(data_docs, cluster %in% tuple)
-  
-  classement_cluster = as.data.frame(table(as.vector(data_docs$cluster)))
-  classement_cluster = classement_cluster[order(-classement_cluster$Freq),]
-  names(classement_cluster) = c('cluster','score')
-  name_score = "Nombre de documents "
-  
-  
-  idx_topics = unique(classement_cluster$cluster)
-  nombre_labels = length(idx_topics)
-  
-  numero = 1:nombre_labels
-  label = character(nombre_labels)
-  classement = character(nombre_labels)
-  top_termes = character(nombre_labels)
-  
-  for (i in seq_len(nombre_labels)) {
-    idx = idx_topics[i]
-    
-    label_i = label_df_choix[which(label_df_choix$cluster==idx),]$label
-    label[i] = as.character(label_i)
-    
-    score_i = classement_cluster[which(classement_cluster$cluster==idx),]$score
-    classement[i] = as.character(round(score_i,2))
-    
-    top_termes_i = data_terms[which(data_terms$cluster==idx),]
-    top_termes_i = top_termes_i[order(-top_termes_i$freq),]$terms
-    
-    message = paste(top_termes_i[1])
-    if (nb_top_termes > 1) {
-      for (j in 2:nb_top_termes) {
-        message = paste(message,' - ',top_termes_i[j])
-      }
-    }
-    
-    top_termes[i] = as.character(message)
-  }
-  
-  return(list(label,classement,top_termes))
-  
-}
-
-assembler_tuple = function(idx){
-  incProgress(1/6)
-  data_new = assembler_tuple_topics(dt_topics$tuples[[idx]], input$Choix_modele, fasttext[[1]], fasttext[[2]], datas$df_document_vector_before, datas$df_document_vector, datas$top_topic_terms, datas$df_informations, datas$df_sim_terme_topic, datas$df_sim_doc_topic, datas$df_word_cluster_tf, datas$df_word_cluster_tfidf, datas$df_label)
-  incProgress(1/2)
-
-  for (i in 1:10) {
-    if (i == 4) {
-      datas[[paste0('matrice_sim_topics_', input$Choix_modele)]] = data_new[[i]]
-      incProgress(1/6)
-    }
-    else{
-      datas[[name_dataset[i]]] = data_new[[i]]
-    }
-  }
-  incProgress(1/6)
-}
-
-observeEvent(input$assembler_1,{
-  withProgress(message = 'Assemblage', value = 0, {
-  assembler_tuple(1)
-  })
-}, priority = 10,ignoreNULL = FALSE,ignoreInit = TRUE)
-observeEvent(input$assembler_2,{
-  withProgress(message = 'Assemblage', value = 0, {
-    assembler_tuple(2)
-  })
-}, priority = 10,ignoreNULL = FALSE,ignoreInit = TRUE)
-observeEvent(input$assembler_3,{
-  withProgress(message = 'Assemblage', value = 0, {
-    assembler_tuple(3)
-  })
-}, priority = 10,ignoreNULL = FALSE,ignoreInit = TRUE)
-observeEvent(input$assembler_4,{
-  withProgress(message = 'Assemblage', value = 0, {
-    assembler_tuple(4)
-  })
-}, priority = 10,ignoreNULL = FALSE,ignoreInit = TRUE)
