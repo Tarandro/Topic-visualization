@@ -13,9 +13,9 @@ require(sqldf)
 library(RCurl)
 
 
-path = "https://github.com/Tarandro/Topic-visualization/tree/main/data/CDP_hierar/"  # Tripadvisor_pos
+path = "CDP_hierar/"  # Tripadvisor_pos
 
-df_label = read.csv(getURL(paste0(path,'df_label','.csv')))
+
 df_label = read.csv(paste0(path,'df_label','.csv'))
 top_topic_terms = read.csv(paste0(path,'top_topic_terms','.csv'))
 df_document_vector_before = read.csv(paste0(path,'df_document_vector_before','.csv'))

@@ -23,9 +23,7 @@ tabItem(
                       column(
                         p(htmlOutput("informations_metrique"),style="color:black"),
                         br(),
-                        p("Lors de l'agrégation, toutes les paires de thèmes (matrice X) avec une similarité supérieure au Seuil_1 sont assemblées ensemble 
-                          et les thèmes (matrice Y) avec une similarité entre documents inférieure au Seuil_2 sont assemblés avec le thème qui leur est le plus similaire. 
-                          Ensuite, on obtient la fonction de perte suivante :",style="text-align:left"),
+                        p(" ... ",style="text-align:left"),
                         uiOutput("fct_perte",style="text-align:center;color:black;border:1px solid black;background-color:white"),
                         br(),
                         width=8,style="background-color:lavender;border-radius: 10px")),
