@@ -34,7 +34,7 @@ df_sim_terme_topic = read.csv(paste0(path,'df_sim_terme_topic','.csv'))
 df_sim_doc_topic = read.csv(paste0(path,'df_sim_doc_topic','.csv'))
 df_word_cluster_tf = read.csv(paste0(path,'df_word_cluster_tf','.csv'))
 df_word_cluster_tfidf = read.csv(paste0(path,'df_word_cluster_tfidf','.csv'))
-
+df_lemma = read.csv(paste0(path,'df_lemma','.csv'))
 
 
 readUrl <- function(name) {
@@ -46,7 +46,7 @@ readUrl <- function(name) {
 }
 
 name_dataset = c('df_document_vector_before','df_document_vector','top_topic_terms','df_hierarchy_top_terms','df_info_classif','df_sim_terme_topic',
-                 'df_sim_doc_topic','df_informations','df_word_cluster_tf','df_word_cluster_tfidf','df_label')
+                 'df_sim_doc_topic','df_informations','df_word_cluster_tf','df_word_cluster_tfidf','df_lemma','df_label')
 
 name_modeles = c()
 

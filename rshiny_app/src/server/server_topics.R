@@ -40,6 +40,9 @@ observeEvent({input$bouton_rerun
     CLUSTER = subset_label[which(subset_label$label %in% input$Choix_themes & subset_label$modele==input$Choix_modele),]$cluster
     
     df_document_vector_modele_cluster = subset(datas$df_document_vector, modele == input$Choix_modele & cluster %in% CLUSTER)
+    # take only text with n_char > mean(nchar)
+    df_document_vector_modele_cluster = df_document_vector_modele_cluster[nchar(df_document_vector_modele_cluster$terms_non_pre) > mean(nchar(df_document_vector_modele_cluster$terms_non_pre)),]
+    # order by score:
     df_document_vector_modele_cluster = df_document_vector_modele_cluster[order(-df_document_vector_modele_cluster$score),][1:n_top_documents,]
     dt_topics$df_document_vector_modele_cluster = df_document_vector_modele_cluster[sample(1:length(df_document_vector_modele_cluster$terms)),]
 },ignoreNULL = FALSE,ignoreInit = FALSE)
@@ -330,50 +333,90 @@ surligner_mots = function(nb_top_termes, lim_top_termes,label_i,top_termes_i,df_
   label_i = label_i$label
   
   message = paste0('Exemples de documents du top ', n_top_documents,' appartenant au thème: <br/> <br/>')
-  df_document_vector_i = strsplit(as.character(df_document_vector_i$terms), " ")
+  #df_document_vector_i = strsplit(as.character(df_document_vector_i$terms), " ")
+  df_document_vector_i_non_pre = strsplit(as.character(df_document_vector_i$terms_non_pre), " ")
   
-  for (text_split in df_document_vector_i) {
+  top_terms = df_word_cluster_i$terms[1:lim_top_termes]
+
+  for (text_split in df_document_vector_i_non_pre) {
+    
+    text_lemmatize = copy(text_split)
+    for (i in 1:length(text_split)) {
+      text_lemmatize[i] = subset(datas$df_lemma, token == text_split[i])$lem[1]
+    }
+    color = rep(0,length(text_split))
+    prc_color = 0.5
+    
+    ## tri-grams :
+    trigrams=3
+    nb_max_na = 4
+    for (i in 1:length(text_lemmatize)) {
+      if (!is.na(text_lemmatize[i])) {
+        j = i
+        condition = F
+        while (condition == F & j < i + nb_max_na) {
+          j = j+1
+          
+          if (sum(!is.na(text_lemmatize[i:j]))==trigrams) {
+            condition = T
+          }
+        }
+        
+        if (condition) {
+          ngrams = text_lemmatize[i]
+          for (word in text_lemmatize[(i+1):j]) {
+            if (!is.na(word)) {
+              ngrams = paste(ngrams, word)
+            }
+          }
+          if (is_in(ngrams,top_terms)) {
+            color[i:j]=prc_color
+          }
+        }
+      }
+    }
+    
+    # bi-grams:
+    bigrams=2
+    nb_max_na = 3
+    for (i in 1:length(text_lemmatize)) {
+      if (!is.na(text_lemmatize[i])) {
+        j = i
+        condition = F
+        while (condition == F & j < i + nb_max_na) {
+          j = j+1
+          if (sum(!is.na(text_lemmatize[i:j]))==bigrams) {
+            condition = T
+          }
+        }
+        
+        if (condition) {
+          ngrams = text_lemmatize[i]
+          for (word in text_lemmatize[(i+1):j]) {
+            if (!is.na(word)) {
+              ngrams = paste(ngrams, word)
+            }
+          }
+          if (is_in(ngrams,top_terms)) {
+            color[i:j]=prc_color
+          }
+        }
+      }
+    }
+    
+    #unigrams :
+    for (i in 1:length(text_lemmatize)) {
+      if (!is.na(text_lemmatize[i])) {
+        if (is_in(text_lemmatize[i],top_terms)) {
+          color[i]=prc_color
+        }
+      }
+    }
+
     html = "<span style='background-color:lavender'><Font size=-1>"
     for (j in 1:length(text_split)) {
-      x = 0
-      
-      termes = c()
-      if (length(text_split) > 2) {
-        mots_3 = c()
-        if (j < length(text_split) - 1) {
-          mots_3 = c(mots_3,paste(text_split[j],text_split[j+1],text_split[j+2]))
-        }
-        if (j < length(text_split) & j != 0) {
-          mots_3 = c(mots_3,paste(text_split[j-1],text_split[j],text_split[j+1]))
-        }
-        if (j > 1) {
-          mots_3 = c(mots_3,paste(text_split[j-2],text_split[j-1],text_split[j]))
-        }
-        termes = c(termes,mots_3)
-      }
-      
-      if (length(text_split) > 1) {
-        mots_2 = c()
-        if (j < length(text_split)) {
-          mots_2 = c(mots_2,paste(text_split[j],text_split[j+1]))
-        }
-        if (j > 0) {
-          mots_2 = c(mots_2,paste(text_split[j-1],text_split[j]))
-        }
-        termes = c(termes,mots_2)
-      }  
-      
-      mots_1 = c(text_split[j])
-      termes = c(termes,mots_1)
-      
-      for (terme in termes) {
-        if (is_in(terme,df_word_cluster_i$terms[1:lim_top_termes])) {
-          x = 0.5
-        }
-      }
-      
       html = paste(html,' ')
-      html = paste0(html,"<span style='background:rgba(153,51,204,",x,");font-family:monospace'>")
+      html = paste0(html,"<span style='background:rgba(153,51,204,",color[j],");font-family:monospace'>")
       html = paste0(html,text_split[j])
       html = paste0(html,"</span>")
     }

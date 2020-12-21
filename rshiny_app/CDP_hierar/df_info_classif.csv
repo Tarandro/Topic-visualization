@@ -1,6 +1,6 @@
 model,score_kfold,modele
-Random Forest Classifier,0.6428184281842818,top2vec
-Random Forest Classifier,0.7844395791176944,bert_hdbscan
-Random Forest Classifier,0.8301261132951824,nmf_frobenius
-Random Forest Classifier,0.6450308294012193,nmf_kullback
-MLP Classifier,0.089042404666543,blend_model
+Random Forest Classifier,0.8282491578783796,nmf_frobenius
+Random Forest Classifier,0.6641114982578398,top2vec
+Random Forest Classifier,0.8040303613427412,bert_hdbscan
+Random Forest Classifier,0.6273751507354618,nmf_kullback
+MLP Classifier,0.07779858820140362,blend_model

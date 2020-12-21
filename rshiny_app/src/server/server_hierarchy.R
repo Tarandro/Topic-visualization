@@ -60,20 +60,23 @@ viznetwork= function(label_df, df_top_terms, df_hierarchy){
     ######
     # si children topics :
     if (length(df_hierarchy$top_terms)>0) {
-        hierarchy_top_3 = unlist(lapply(df_hierarchy$top_terms, get_top_terms, n=3))
-        hierarchy_top_5 = unlist(lapply(df_hierarchy$top_terms, get_top_terms, n=5))
+        copy_df_hierarchy = copy(df_hierarchy)
+        copy_df_hierarchy$top_3 = unlist(lapply(copy_df_hierarchy$top_terms, get_top_terms, n=3))
+        #can have duplicate of top 3 terms:
+        copy_df_hierarchy = copy_df_hierarchy[!duplicated(copy_df_hierarchy$top_3), ]
+        copy_df_hierarchy$top_5 = unlist(lapply(copy_df_hierarchy$top_terms, get_top_terms, n=5))
         
-        nodes_child = as.data.frame(hierarchy_top_3)
+        nodes_child = as.data.frame(copy_df_hierarchy$top_3)
         colnames(nodes_child) = c("label")
         nodes_child$id = nodes_child$label
-        nodes_child$group = df_hierarchy$cluster
-        nodes_child$title = hierarchy_top_5
+        nodes_child$group = copy_df_hierarchy$cluster
+        nodes_child$title = copy_df_hierarchy$top_5
         
         nodes = rbind(nodes, nodes_child)
         
-        edges_child <- as.data.frame(hierarchy_top_3)
+        edges_child <- as.data.frame(copy_df_hierarchy$top_3)
         colnames(edges_child) = c("to")
-        b = merge(df_hierarchy, label_df, by = 'cluster')
+        b = merge(copy_df_hierarchy, label_df, by = 'cluster')
         edges_child$from = b$label
         edges_child$width = '1'
         
