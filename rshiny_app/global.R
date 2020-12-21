@@ -10,14 +10,22 @@ require(htmlwidgets)
 require(reshape)
 require(viridis)
 require(sqldf)
-library(RCurl)
+require(visNetwork)
+require(geomnet)
+require(igraph)
+require(dplyr)
+require(stringr)
 
+
+#library(rsconnect)
+#deployApp("~/Documents/NLP-TopicModeling/Topic-visualization/rshiny_app")
 
 path = "CDP_hierar/"  # Tripadvisor_pos
 
 
 df_label = read.csv(paste0(path,'df_label','.csv'))
 top_topic_terms = read.csv(paste0(path,'top_topic_terms','.csv'))
+df_hierarchy_top_terms = read.csv(paste0(path,'df_hierarchy_top_terms','.csv'))
 df_document_vector_before = read.csv(paste0(path,'df_document_vector_before','.csv'))
 df_document_vector = read.csv(paste0(path,'df_document_vector','.csv'))
 df_informations = read.csv(paste0(path,'df_informations','.csv'))
@@ -37,7 +45,7 @@ readUrl <- function(name) {
   return(out)
 }
 
-name_dataset = c('df_document_vector_before','df_document_vector','top_topic_terms','df_info_classif','df_sim_terme_topic',
+name_dataset = c('df_document_vector_before','df_document_vector','top_topic_terms','df_hierarchy_top_terms','df_info_classif','df_sim_terme_topic',
                  'df_sim_doc_topic','df_informations','df_word_cluster_tf','df_word_cluster_tfidf','df_label')
 
 name_modeles = c()

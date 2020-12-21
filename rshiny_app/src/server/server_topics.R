@@ -6,6 +6,7 @@ dt_topics = reactiveValues(df_document_vector_modele = NULL, top_topic_terms_mod
                            df_label_modele_cluster = NULL,df_word_cluster_tf_modele_cluster = NULL, df_word_cluster_tfidf_modele_cluster= NULL,
                            df_label_modele_cluster_all_choix = NULL, label_df_choix = NULL, length_nmf = NULL, top_termes_nmf = NULL,
                            doc_topic = NULL, yolo = 0, tuples = NULL)
+n_top_documents = 40
 
 observeEvent(input$Choix_themes, {
   
@@ -35,8 +36,12 @@ observeEvent(input$Choix_themes, {
 # sélectionne le bouton rerun, sample les données appartenant au topic
 observeEvent({input$bouton_rerun
   input$Choix_themes},{
-  df_document_vector_modele_cluster = subset(datas$df_document_vector, modele == input$Choix_modele)
-  dt_topics$df_document_vector_modele_cluster = df_document_vector_modele_cluster[sample(1:length(df_document_vector_modele_cluster$terms)),]
+    subset_label = dt_topics$label_df_modele_choix
+    CLUSTER = subset_label[which(subset_label$label %in% input$Choix_themes & subset_label$modele==input$Choix_modele),]$cluster
+    
+    df_document_vector_modele_cluster = subset(datas$df_document_vector, modele == input$Choix_modele & cluster %in% CLUSTER)
+    df_document_vector_modele_cluster = df_document_vector_modele_cluster[order(-df_document_vector_modele_cluster$score),][1:n_top_documents,]
+    dt_topics$df_document_vector_modele_cluster = df_document_vector_modele_cluster[sample(1:length(df_document_vector_modele_cluster$terms)),]
 },ignoreNULL = FALSE,ignoreInit = FALSE)
 
 # Si on écrit dans la case 'autre label' alors un bouton 'autre label' se rajoute dans la liste des labels du topic
@@ -324,7 +329,7 @@ surligner_mots = function(nb_top_termes, lim_top_termes,label_i,top_termes_i,df_
   df_word_cluster_i = df_word_cluster_i[order(-df_word_cluster_i$freq),]
   label_i = label_i$label
   
-  message = 'Exemples de documents appartenant au thème : <br/> <br/>'
+  message = paste0('Exemples de documents du top ', n_top_documents,' appartenant au thème: <br/> <br/>')
   df_document_vector_i = strsplit(as.character(df_document_vector_i$terms), " ")
   
   for (text_split in df_document_vector_i) {
