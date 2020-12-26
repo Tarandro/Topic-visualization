@@ -3,11 +3,12 @@ dashboardPage(
   
   dashboardSidebar(
     sidebarMenu(
+      id = 'tabs',
       menuItem("Thèmes", tabName = "topics"),
       menuItem("Agrégation", tabName = "agregation"),
       menuItem("Hierarchy", tabName = "hierarchy"),
+      menuItem("Documents", tabName = "documents"),
       menuItem("Visualisation", tabName = "visualisation"),
-      menuItem("Classification", tabName = "classification"),
       menuItem("Dataset", tabName = "dataset")
     )
   ),
@@ -23,11 +24,11 @@ dashboardPage(
       tabItem(tabName = "hierarchy",
               source("./src/ui/ui_hierarchy.R", encoding = "UTF-8")$value),
       
+      tabItem(tabName = "documents",
+              source("./src/ui/ui_documents.R", encoding = "UTF-8")$value),
+      
       tabItem(tabName = "visualisation",
               source("./src/ui/ui_visualisation.R", encoding = "UTF-8")$value),
-      
-      tabItem(tabName = "classification",
-              source("./src/ui/ui_classification.R", encoding = "UTF-8")$value),
       
       tabItem(tabName = "dataset",
               source("./src/ui/ui_dataset.R", encoding = "UTF-8")$value)

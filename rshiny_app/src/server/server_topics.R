@@ -12,10 +12,10 @@ observeEvent(input$Choix_themes, {
   
   subset_label = dt_topics$label_df_modele_choix
   CLUSTER = subset_label[which(subset_label$label %in% input$Choix_themes & subset_label$modele==input$Choix_modele),]$cluster
-  
+
   dt_topics$top_topic_terms_modele_cluster = subset(datas$top_topic_terms, modele == input$Choix_modele & cluster %in% CLUSTER)
   dt_topics$df_label_modele_cluster = subset(subset_label, cluster %in% CLUSTER)
-  
+
   df_word_cluster_tf_modele= subset(datas$df_word_cluster_tf, modele == input$Choix_modele)
   df_word_cluster_tf_modele_cluster = df_word_cluster_tf_modele[,c('terms',paste0('X',CLUSTER))]
   names(df_word_cluster_tf_modele_cluster) = c('terms','freq')
@@ -59,9 +59,11 @@ observeEvent(input$autre_label, {
 
 # Si on change de label, changer le label dans les subset
 observeEvent(input$boutons_label, {
-  
+
   df_label_1 = datas$df_label
+  
   df_label_1[which(df_label_1$modele == input$Choix_modele & df_label_1$cluster %in% df_label_1[which(df_label_1$model ==input$Choix_modele & df_label_1$label == input$Choix_themes),]$cluster),'choix'] = 0
+
   if (input$boutons_label != 'autre label'){
     df_label_1[which(df_label_1$modele == input$Choix_modele & df_label_1$cluster %in% df_label_1[which(df_label_1$model ==input$Choix_modele & df_label_1$label == input$Choix_themes),]$cluster & df_label_1$label==input$boutons_label),'choix'] = 1
     updatePickerInput(session = session, inputId = "Choix_themes", 
@@ -71,7 +73,7 @@ observeEvent(input$boutons_label, {
   else{
     if (input$autre_label %in% df_label_1[which(df_label_1$modele == input$Choix_modele & df_label_1$cluster %in% df_label_1[which(df_label_1$model ==input$Choix_modele & df_label_1$label == input$Choix_themes),]$cluster),]$label){
       df_label_1[which(df_label_1$modele == input$Choix_modele & df_label_1$cluster %in% df_label_1[which(df_label_1$model ==input$Choix_modele & df_label_1$label == input$Choix_themes),]$cluster & df_label_1$label==input$boutons_label),'choix'] = 1
-    }
+      }
     else{
       df_label_1$label = as.character(df_label_1$label)
       df_label_1 = rbind(df_label_1,c(input$autre_label,df_label_1[which(df_label_1$model ==input$Choix_modele & df_label_1$label == input$Choix_themes),]$cluster, 1, input$Choix_modele))
@@ -96,10 +98,18 @@ observeEvent({input$Choix_modele
   df_label_1 = subset(datas$df_label, modele == input$Choix_modele)
 
   df_label_3 = subset(df_label_1, choix == 1 )
-  updatePickerInput(session = session, inputId = "Choix_themes", 
+  
+  if (!dt_docs$select_button_doc) {
+    updatePickerInput(session = session, inputId = "Choix_themes", 
                     choices = as.vector(df_label_3$label),
                     selected = as.vector(unique(df_label_3$label)[1]))
-  
+  }
+  else{
+    updatePickerInput(session = session, inputId = "Choix_themes", 
+                      choices = as.vector(df_label_3$label),
+                      selected = as.vector(input$Choix_themes))
+    dt_docs$select_button_doc = FALSE
+  }
   
   data = subset(df_label_1, cluster %in% df_label_1[which(df_label_1$label == as.vector(unique(df_label_3$label)[1])),]$cluster)
   dt_topics$df_label_modele_cluster_all_choix = data
@@ -125,13 +135,6 @@ observeEvent(input$select_button, {
   updatePickerInput(session = session, inputId = "Choix_themes", selected = as.vector(input$select_button))
   session$sendCustomMessage(type = 'resetInputValue', message =  "select_button")
 },ignoreNULL = FALSE,ignoreInit = TRUE)
-
-# Si on change theme dans 'Documents' alors changer theme dans 'NMF_topic'
-observeEvent({input$Choix_themes}, {
-  updatePickerInput(session = session, inputId = "Choix_themes_nmf",
-                    choices = as.vector(dt_topics$label_df_modele_choix$label),
-                    selected = as.vector(input$Choix_themes))
-})
 
 # vider tableau
 observeEvent(input$Choix_themes_nmf, {
@@ -323,10 +326,9 @@ output$freq_top_termes <- renderPlotly({
 
 
 ########################################################################################
-surligner_mots = function(nb_top_termes, lim_top_termes,label_i,top_termes_i,df_document_vector_reactive,df_word_cluster_i){
+surligner_mots = function(nb_top_termes, lim_top_termes,label_i,df_document_vector_reactive,df_word_cluster_i){
   "Affiche des documents du topic et Surligne les tops termes du topic"
   
-  top_termes_i = top_termes_i$terms
   df_document_vector_i = subset(df_document_vector_reactive, cluster %in% label_i$cluster)
   df_document_vector_i = df_document_vector_i[1:5,]
   df_word_cluster_i = df_word_cluster_i[order(-df_word_cluster_i$freq),]
@@ -429,7 +431,6 @@ surligner_mots = function(nb_top_termes, lim_top_termes,label_i,top_termes_i,df_
 
 output$exemple_docs <- renderText({
   label_i = dt_topics$df_label_modele_cluster
-  top_termes_i = dt_topics$top_topic_terms_modele_cluster
   df_document_vector_reactive = dt_topics$df_document_vector_modele_cluster
   #if (input$Choix_modele == 'lda'){
   df_word_cluster_i = dt_topics$df_word_cluster_tf_modele_cluster
@@ -437,7 +438,7 @@ output$exemple_docs <- renderText({
   #else{
   #df_word_cluster_i = dt_topics$df_word_cluster_tfidf_modele_cluster
   #}
-  surligner_mots(input$select_nb_topterms,input$select_lim_top_termes,label_i,top_termes_i,df_document_vector_reactive,df_word_cluster_i)
+  surligner_mots(input$select_nb_topterms,input$select_lim_top_termes,label_i,df_document_vector_reactive,df_word_cluster_i)
 })
 
 ########################################################################################

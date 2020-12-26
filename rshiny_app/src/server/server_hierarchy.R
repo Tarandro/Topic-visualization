@@ -9,7 +9,7 @@ observeEvent({input$Choix_modele_hier
     dt_hierarchy$df_hierarchy_top_terms_modele = subset(datas$df_hierarchy_top_terms, modele == input$Choix_modele_hier)
   },priority = 2,ignoreNULL = FALSE,ignoreInit = FALSE)
 
-#######################################################################################"
+#######################################################################################
 
 get_top_terms = function(string_list, n){
   " design the top terms presentation from a string_list of top terms "

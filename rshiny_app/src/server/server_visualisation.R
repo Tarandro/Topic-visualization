@@ -46,7 +46,7 @@ plotly_tsne_word= function(label_df, top_terms, myColors){
   fig <- plot_ly(data = top_terms, x = ~tsne_1, y = ~tsne_2,color = ~label,
                  text = ~paste("Label :",label,'</br></br>Terme :', terms),size = ~freq,
                  hoverinfo = 'text',colors=myColors,
-                 type = 'scatter', mode = 'markers')%>%
+                 type = 'scatter', mode = 'markers', fill = ~'')%>%
     layout(title = 't-SNE représentation des top termes',
            yaxis=list(title='axis 2',showgrid=FALSE,zeroline=FALSE,tickvals=c(''))
            ,xaxis=list(title='axis 1',showgrid=FALSE,zeroline=FALSE,tickvals=c('')))
@@ -87,7 +87,7 @@ plotly_tsne_docs = function(label_df, data_docs, myColors){
   fig <- plot_ly(data = data_docs, x = ~tsne_1, y = ~tsne_2,color = ~label,
                  text = ~paste("Label :",label,'</br></br>Terme :', terms),
                  hoverinfo = 'text',colors=myColors,
-                 type = 'scatter', mode = 'markers')%>%
+                 type = 'scatter', mode = 'markers',fill = ~'')%>%
     layout(title = 't-SNE représentation des documents (5000 max)',
            yaxis=list(title='axis 2',showgrid=FALSE,zeroline=FALSE,tickvals=c(''))
            ,xaxis=list(title='axis 1',showgrid=FALSE,zeroline=FALSE,tickvals=c('')))

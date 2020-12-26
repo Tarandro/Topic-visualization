@@ -15,6 +15,8 @@ require(geomnet)
 require(igraph)
 require(dplyr)
 require(stringr)
+require(ramify)
+require(rsconnect)
 
 
 #library(rsconnect)

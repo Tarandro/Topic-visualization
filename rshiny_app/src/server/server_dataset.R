@@ -1,11 +1,3 @@
-observeEvent(input$box_models, {
-  subset_name_dataset = name_dataset
-  for(modele in input$box_models){
-    subset_name_dataset = c(subset_name_dataset,paste0('matrice_sim_topics_',modele))
-  }
-  updatePickerInput(session = session, inputId = "Choix_dataset", "Dataset",subset_name_dataset,selected = 'df_label')
-})
-
 to_factor = function(name_columns){
   col_to_factor = c()
   for (col in name_columns) {
