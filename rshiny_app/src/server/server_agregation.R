@@ -26,6 +26,12 @@ print_informations = function(data_infos, data_docs){
   message = paste("Nombre de topics avant agrégation :", nb_topic_before_agg)
   
   message = paste(message,'&emsp;&emsp;',"Nombre de topics après agrégation :", length(unique(data_docs$cluster)),'<br/>')
+  
+  seuil_1 = round(data_infos[which(data_infos$infos=='seuil_1'),]$value,2)
+  seuil_2 = round(data_infos[which(data_infos$infos=='seuil_2'),]$value,2)
+  beta = round(data_infos[which(data_infos$infos=='beta'),]$value,2)
+  message = paste(message,'Seuil_1 =',seuil_1[1],'&emsp;&emsp;','Seuil_2 =',seuil_2[1],'&emsp;&emsp;','\\(\\beta\\) =',beta)
+  
   return(HTML(message))
 }
 
@@ -38,7 +44,7 @@ output$informations_metrique <- renderText({
 output$fct_perte <- renderUI({
   data_infos = dt_agregation$df_informations_modele
   score = as.character(round(data_infos[which(data_infos$infos=='loss_fct'),]$value,3))
-  withMathJax(paste('$$Fonction~de~perte = ... =',score,'$$'))
+  withMathJax(paste('$$Fonction~de~perte = \\beta * \\frac{1}{m^{2}} \\sum_{i=1}^{m}\\sum_{j=1}^{m} X_{i,j} + (1-\\beta)*(1 - \\frac{1}{m} \\sum_{i=1}^{m} Y_{i}) =',score,'$$'))
 })
 
 ########################################################################################
