@@ -48,7 +48,8 @@ readUrl <- function(name) {
 }
 
 name_dataset = c('df_document_vector_before','df_document_vector','top_topic_terms','df_hierarchy_top_terms','df_info_classif','df_sim_terme_topic',
-                 'df_sim_doc_topic','df_informations','df_word_cluster_tf','df_word_cluster_tfidf','df_lemma','df_label')
+                 'df_sim_doc_topic','df_informations','df_word_cluster_tf','df_word_cluster_tfidf','df_lemma','df_label',
+                 'dataset_preprocessed')
 
 name_modeles = c()
 

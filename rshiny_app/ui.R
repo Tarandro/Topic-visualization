@@ -4,6 +4,7 @@ dashboardPage(
   dashboardSidebar(
     sidebarMenu(
       id = 'tabs',
+      menuItem("Introduction", tabName = "introduction"),
       menuItem("Thèmes", tabName = "topics"),
       menuItem("Agrégation", tabName = "agregation"),
       menuItem("Hierarchy", tabName = "hierarchy"),
@@ -15,6 +16,9 @@ dashboardPage(
   
   dashboardBody(
     tabItems(
+      tabItem(tabName = "introduction",
+              source("./src/ui/ui_introduction.R", encoding = "UTF-8")$value),
+      
       tabItem(tabName = "topics",
               source("./src/ui/ui_topics.R", encoding = "UTF-8")$value),
       
