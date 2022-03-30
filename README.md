@@ -28,7 +28,7 @@ Visualization of topics from different topic models with R Shiny
 
 **Documents :**
 
-- [ ] Choix du label drop duplicates
+- [x] Choix du label drop duplicates
 
 - [ ] Corriger "" custom label
 

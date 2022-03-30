@@ -54,8 +54,13 @@ observeEvent(input$autre_label, {
   updateRadioButtons(session, inputId ="boutons_label",
                      choices = c(as.vector(data$label),'autre label'),
                      selected = as.vector(data[which(data$choix==1),]$label[1]))
+  }else{
+    data = dt_topics$df_label_modele_cluster_all_choix
+    updateRadioButtons(session, inputId ="boutons_label",
+                       choices = c(as.vector(data$label)),
+                       selected = as.vector(data[which(data$choix==1),]$label[1]))
   }
-},ignoreNULL = FALSE,ignoreInit = FALSE)
+},ignoreNULL = TRUE,ignoreInit = TRUE)
 
 # Si on change de label, changer le label dans les subset
 observeEvent(input$boutons_label, {

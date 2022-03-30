@@ -26,6 +26,9 @@ path = "CDP_hierar/"  # Tripadvisor_pos
 
 
 df_label = read.csv(paste0(path,'df_label','.csv'))
+df_label$label <- mapply(function(x){return(strsplit(x, "_")[[1]][1])}, df_label$label)
+df_label <- df_label[!((duplicated(df_label[, c("label", "cluster", "modele")]) | duplicated (df_label[, c("label", "cluster", "modele")], fromLast = TRUE)) & df_label$choix == 0),]
+
 top_topic_terms = read.csv(paste0(path,'top_topic_terms','.csv'))
 df_hierarchy_top_terms = read.csv(paste0(path,'df_hierarchy_top_terms','.csv'))
 df_document_vector_before = read.csv(paste0(path,'df_document_vector_before','.csv'))
@@ -60,7 +63,14 @@ for(modele in unique(df_label$modele)){
 # create a reactiveValues with all datasets
 datas = reactiveValues()
 for(name in name_dataset){
-  datas[[name]] = read.csv(paste0(path,name,'.csv'))
+  if (name == "df_label") {
+    dt <- read.csv(paste0(path,name,'.csv'))
+    dt$label <- mapply(function(x){return(strsplit(x, "_")[[1]][1])}, dt$label)
+    dt <- dt[!((duplicated(dt[, c("label", "cluster", "modele")]) | duplicated (dt[, c("label", "cluster", "modele")], fromLast = TRUE)) & dt$choix == 0),]
+    datas[[name]] <- dt
+  }else{
+    datas[[name]] <- read.csv(paste0(path,name,'.csv'))
+  }
 }
 
 for(modele in name_modeles){

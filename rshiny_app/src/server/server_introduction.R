@@ -31,7 +31,7 @@ observeEvent({input$bouton_other_examples},{
     )
   })
   
-},priority = 0,ignoreNULL = FALSE,ignoreInit = FALSE)
+},priority = 1,ignoreNULL = FALSE,ignoreInit = FALSE)
 
 
 
