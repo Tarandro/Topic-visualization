@@ -17,7 +17,9 @@ get_top_terms = function(string_list, n){
   string_list = substring(string_list, 2)
   string_list = strsplit(string_list,', ')
   string_list = string_list[[1]]
+  string_list = gsub("]", "",string_list)
   
+  #message = unlist(string_list) %>% paste(collapse = " - ")
   message = ""
   for (i in 1:n) {
     if (i == 1) {
@@ -36,10 +38,7 @@ viznetwork= function(label_df, df_top_terms, df_hierarchy){
     " crée les dataframes nodes et edges puis visualisation avec vizNetwork "
     title = c()
     for (topic in label_df$cluster) {
-      message = ""
-      for (i in 1:5) {
-        message = paste(message, '-',subset(df_top_terms, cluster == topic)$terms[i])
-      }
+      message = unlist(subset(df_top_terms, cluster == topic)$terms[1:5]) %>% paste(collapse = " - ")
       title = c(title,message)
     }
     

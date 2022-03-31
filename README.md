@@ -39,19 +39,19 @@ Visualization of topics from different topic models with R Shiny
 
 **Custom Aggregation :**
 
-- [ ] Remettre Tab custom aggregation
+- [ ] Remettre Tab custom aggregation (Fasttext)
 
 
 **Aggregation :**
 
-- [ ] Introduction et Remettre formule
+- [x] Introduction et Remettre formule
 
 - [ ] Revoir les 2 dernières matrices
 
 
 **Hierarchy :**
 
-- [ ] Remove -
+- [x] Remove -
 
 
 **Visualisation :**
