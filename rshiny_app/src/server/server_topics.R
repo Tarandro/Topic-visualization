@@ -5,7 +5,7 @@ dt_topics = reactiveValues(df_document_vector_modele = NULL, top_topic_terms_mod
                            label_df_modele_choix = NULL,df_document_vector_modele_cluster = NULL, top_topic_terms_modele_cluster = NULL,
                            df_label_modele_cluster = NULL,df_word_cluster_tf_modele_cluster = NULL, df_word_cluster_tfidf_modele_cluster= NULL,
                            df_label_modele_cluster_all_choix = NULL, label_df_choix = NULL, length_nmf = NULL, top_termes_nmf = NULL,
-                           doc_topic = NULL, yolo = 0, tuples = NULL)
+                           doc_topic = NULL, yolo = 0, tuples = NULL, cache_cluster = -100, cache_modele = "")
 n_top_documents = 40
 
 observeEvent(input$Choix_themes, {
@@ -28,6 +28,18 @@ observeEvent(input$Choix_themes, {
   
   dt_topics$df_label_modele_cluster_all_choix = subset(datas$df_label, modele == input$Choix_modele & cluster %in% CLUSTER)
   data = dt_topics$df_label_modele_cluster_all_choix
+  
+  if (length(data$label) < 3) {
+    label <- dt_topics$top_topic_terms_modele_cluster$terms[1:4][!dt_topics$top_topic_terms_modele_cluster$terms[1:4] %in% data$label][1:(3-length(data$label))]
+    dt <- data.frame(label)
+    dt[["cluster"]] <- CLUSTER
+    dt[["choix"]] <- 0
+    dt[["modele"]] <- input$Choix_modele
+    data <- rbind(data, dt)
+    dt_topics$df_label_modele_cluster_all_choix <- data
+    datas$df_label <- rbind(datas$df_label, dt)
+  }
+  
   updateRadioButtons(session, inputId ="boutons_label",
                      choices = as.vector(data$label),
                      selected = as.vector(data[which(data$choix==1),]$label[1]))
@@ -39,12 +51,18 @@ observeEvent({input$bouton_rerun
     subset_label = dt_topics$label_df_modele_choix
     CLUSTER = subset_label[which(subset_label$label %in% input$Choix_themes & subset_label$modele==input$Choix_modele),]$cluster
     
-    df_document_vector_modele_cluster = subset(datas$df_document_vector, modele == input$Choix_modele & cluster %in% CLUSTER)
-    # take only text with n_char > mean(nchar)
-    df_document_vector_modele_cluster = df_document_vector_modele_cluster[nchar(df_document_vector_modele_cluster$terms_non_pre) > mean(nchar(df_document_vector_modele_cluster$terms_non_pre)),]
-    # order by score:
-    df_document_vector_modele_cluster = df_document_vector_modele_cluster[order(-df_document_vector_modele_cluster$score),][1:n_top_documents,]
-    dt_topics$df_document_vector_modele_cluster = df_document_vector_modele_cluster[sample(1:length(df_document_vector_modele_cluster$terms)),]
+    if (dt_topics$cache_cluster != CLUSTER || dt_topics$cache_modele != input$Choix_modele) {
+      dt_topics$cache_cluster <- CLUSTER
+      dt_topics$cache_modele <- input$Choix_modele
+      df_document_vector_modele_cluster = subset(datas$df_document_vector, modele == input$Choix_modele & cluster %in% CLUSTER)
+      # take only text with n_char > mean(nchar)
+      df_document_vector_modele_cluster = df_document_vector_modele_cluster[nchar(df_document_vector_modele_cluster$terms_non_pre) > mean(nchar(df_document_vector_modele_cluster$terms_non_pre)),]
+      # order by score:
+      df_document_vector_modele_cluster = df_document_vector_modele_cluster[order(-df_document_vector_modele_cluster$score),][1:n_top_documents,]
+    
+      dt_topics$df_document_vector_modele_cluster = df_document_vector_modele_cluster[sample(1:length(df_document_vector_modele_cluster$terms)),]
+    }
+    
 },ignoreNULL = FALSE,ignoreInit = FALSE)
 
 # Si on écrit dans la case 'autre label' alors un bouton 'autre label' se rajoute dans la liste des labels du topic
@@ -94,6 +112,8 @@ observeEvent(input$boutons_label, {
   
   dt_topics$label_df_modele_choix = subset(df_label_1, modele == input$Choix_modele & choix == 1)
   dt_topics$label_df_choix = subset(df_label_1, choix == 1)
+  
+  dt_topics$change_document = FALSE
   
 }, priority = 2,ignoreNULL = FALSE,ignoreInit = FALSE)
 
@@ -440,15 +460,18 @@ surligner_mots = function(nb_top_termes, lim_top_termes,label_i,df_document_vect
 }
 
 output$exemple_docs <- renderText({
-  label_i = dt_topics$df_label_modele_cluster
-  df_document_vector_reactive = dt_topics$df_document_vector_modele_cluster
-  #if (input$Choix_modele == 'lda'){
-  df_word_cluster_i = dt_topics$df_word_cluster_tf_modele_cluster
-  #}
-  #else{
-  #df_word_cluster_i = dt_topics$df_word_cluster_tfidf_modele_cluster
-  #}
-  surligner_mots(input$select_nb_topterms,input$select_lim_top_termes,label_i,df_document_vector_reactive,df_word_cluster_i)
+  dt_topics$df_document_vector_modele_cluster
+  isolate({
+    label_i = dt_topics$df_label_modele_cluster
+    df_document_vector_reactive = dt_topics$df_document_vector_modele_cluster
+    #if (input$Choix_modele == 'lda'){
+    df_word_cluster_i = dt_topics$df_word_cluster_tf_modele_cluster
+    #}
+    #else{
+    #df_word_cluster_i = dt_topics$df_word_cluster_tfidf_modele_cluster
+    #}
+    surligner_mots(input$select_nb_topterms,input$select_lim_top_termes,label_i,df_document_vector_reactive,df_word_cluster_i)
+  })
 })
 
 ########################################################################################

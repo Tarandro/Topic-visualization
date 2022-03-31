@@ -30,7 +30,11 @@ Visualization of topics from different topic models with R Shiny
 
 - [x] Choix du label drop duplicates
 
-- [ ] Corriger "" custom label
+- [x] Corriger "" custom label
+
+- [x] Proposer 3 labels
+
+- [x] Ne pas update les examples si on change de label
 
 
 **Custom Aggregation :**
