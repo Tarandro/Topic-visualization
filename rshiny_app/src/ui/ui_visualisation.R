@@ -21,11 +21,17 @@ tabItem(
       box(title = "Nombre de documents", width=12, 
           solidHeader = TRUE, status = "primary",
           plotlyOutput("bar_docs"),
-          dateRangeInput('dateRange',
-                         label = 'Plage de date:',
-                         start = min(df_document_vector$date), end = max(df_document_vector$date),
-                         min = min(df_document_vector$date), max = max(df_document_vector$date),startview = 'year', language = 'fr', weekstart = 1
-          ),
-          plotlyOutput("line_graph")
+          conditionalPanel(
+            condition = "output.ui_has_date",
+            
+            dateRangeInput('dateRange',
+                           label = 'Plage de date:',
+                           start = min(df_document_vector$date), end = max(df_document_vector$date),
+                           min = min(df_document_vector$date), max = max(df_document_vector$date),startview = 'year', language = 'fr', weekstart = 1
+            ),
+            plotlyOutput("line_graph")
+            
+          )
+          
       )
   )

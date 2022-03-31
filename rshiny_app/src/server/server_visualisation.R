@@ -128,12 +128,24 @@ observe({
 
 ########################################################################################
 
+rv_has_date <- reactiveVal(FALSE)
+
 plotly_line_graph = function(label_df, data_docs, myColors){
   "Séries temporelles : nombre de documents par date et topic"
   
   if (is_in('date',names(data_docs))){
     data_docs$date = as.Date(data_docs$date, "%d/%m/%Y")
+  }else{
+    rv_has_date(FALSE)
+    return(NULL)
   }
+  
+  if (length(unique(data_docs$date)) < 2) {
+    rv_has_date(FALSE)
+    return(NULL)
+  }
+  rv_has_date(TRUE)
+  
   data_docs = merge(data_docs,label_df[,c('label','cluster')])
   
   label_count = sqldf("SELECT label,COUNT(modele) as count FROM data_docs GROUP BY  label;")
@@ -155,6 +167,11 @@ plotly_line_graph = function(label_df, data_docs, myColors){
 }
 
 plot.line_graph <- reactiveValues(out = NULL)
+
+output$ui_has_date <- reactive({
+  rv_has_date()
+})
+outputOptions(output, "ui_has_date", suspendWhenHidden = FALSE)
 
 observe({
   output$line_graph <- renderPlotly({
