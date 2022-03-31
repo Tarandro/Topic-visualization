@@ -190,12 +190,12 @@ dataframe_topics = function(nb_top_termes, label_df_choix,data_terms,data_docs,s
      classement_cluster = subset(classement_cluster, !(Var1 == -1)) #remove -1 cluster
      classement_cluster = classement_cluster[order(-classement_cluster$Freq),]
      names(classement_cluster) = c('cluster','score')
-     name_score = "Nombre de documents "
+     name_score = "Nombre de documents"
    }
    else{
      classement_cluster = sim_topics[order(-sim_topics$sim),]
      names(classement_cluster) = c('cluster','score','modele')
-     name_score = "Similarités "
+     name_score = "Intra - Similarités"
    }
   
   idx_topics = classement_cluster$cluster
@@ -229,7 +229,7 @@ dataframe_topics = function(nb_top_termes, label_df_choix,data_terms,data_docs,s
     top_termes[i] = as.character(message)
   }
   
-  return(list(numero,classement,label,top_termes))
+  return(list(numero,classement,label,top_termes, name_score))
 
 }
 
@@ -247,7 +247,7 @@ output$table_topics <- DT::renderDataTable(
     sim_topics = dt_topics$df_sim_doc_topic_modele
     
     list_df_top_termes = dataframe_topics(input$select_nb_topterms, label_df_choix,data_terms,data_docs,sim_topics)
-    data.frame(
+    t <- data.frame(
       
       Label = shinyInput(actionButton, length(list_df_top_termes[[3]]), 
                          list_df_top_termes[[3]], label = list_df_top_termes[[3]],
@@ -258,6 +258,11 @@ output$table_topics <- DT::renderDataTable(
       stringsAsFactors = FALSE,
       row.names = 1:length(list_df_top_termes[[3]])
     )
+    
+    colnames(t) <- gsub("Classement", list_df_top_termes[[5]], colnames(t))
+    colnames(t) <- gsub("Top_termes", "Top termes", colnames(t))
+    t
+    
   }, server = FALSE, escape = FALSE, selection = 'none',
   options = list(lengthChange = FALSE, pageLength = nombre_topics(dt_topics$label_df_modele_choix), paging = FALSE, info = FALSE,
                  ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = 1:2)))

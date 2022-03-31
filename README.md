@@ -19,11 +19,11 @@ Visualization of topics from different topic models with R Shiny
 
 **Thèmes :**
 
-- [ ] paragraphe d'introduction
+- [x] paragraphe d'introduction
 
-- [ ] Remove NA top termes
+- [x] Remove NA top termes
 
-- [ ] Rename column Classement
+- [x] Rename column Classement
 
 
 **Documents :**

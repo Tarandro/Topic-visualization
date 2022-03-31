@@ -37,10 +37,12 @@ tabItem(
     
     tabPanel("Thèmes", 
              fluidRow(
-               column(3,
+               column(2,
                       pickerInput("Choix_modele", "Modèle", as.vector(unique(top_topic_terms$modele)),selected = as.vector(unique(top_topic_terms$modele))[1])
                ),
-               column(2),
+               column(1),
+               column(3, br(), p("Un thème est défini par un label et des top termes")),
+               column(1),
                column(4,
                       h4(p(textOutput("nombre_documents"),style="color:black")),
                       h4(p(textOutput("nombre_themes"),style="color:black")),
@@ -63,7 +65,7 @@ tabItem(
                      column(1),
                      column(5,
                    sliderInput("select_nb_topterms", label = "Nombre de top termes", min = 1, 
-                               max = 30, value = 10)
+                               max = 15, value = 10)
                      ),
                    ),
                    #h3(uiOutput("print_topics"))
