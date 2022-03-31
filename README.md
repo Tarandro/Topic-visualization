@@ -10,11 +10,11 @@ Visualization of topics from different topic models with R Shiny
 
 **Modèles :**
 
-- [ ] paragraphe d'introduction au topic modeling et analyse de texte non supervisée
+- [x] paragraphe d'introduction au topic modeling et analyse de texte non supervisée
 
-- [ ] une colonne 'Description' pour décrire chaque modèle
+- [x] une colonne 'Description' pour décrire chaque modèle
 
-- [ ] revoir nom de colonne de fonction_de_perte
+- [x] revoir nom de colonne de fonction_de_perte
 
 
 **Thèmes :**

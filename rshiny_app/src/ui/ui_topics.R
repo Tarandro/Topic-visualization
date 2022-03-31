@@ -9,6 +9,21 @@ tabItem(
                         h4(p("Modèles et Résultats des fonctions de perte",style="color:black;text-align:center")),
                         width=8,style="background-color:lavender;border-radius: 10px")),
              br(),
+             fluidRow(column(width=2),
+                      column(
+                        p("L’extraction de topics a pour objectif de découvrir les différents thèmes de la base de données textuelle. 
+                        Un topic représente un contexte et est défini par plusieurs mots clés similaires. 
+                        Un document peut appartenir à un ou plusieurs topics. Les modèles utilisés sont non-supervisés 
+                        et se basent sur la vectorisation des mots ou des documents et le regroupement des vecteurs similaires 
+                        pour modéliser les topics.",style="color:black"),
+                        p("Dans l’objectif de labélisation de topics et puis des documents, 
+                        l’extraction de topics est une étape cruciale. Ainsi, il est important d’avoir des topics bien distincts 
+                        entre eux et qui sont définis par des termes clés pertinents car chaque top terme est un label potentiel. 
+                        Ces deux points sont définis par une fonction de perte à minimiser.
+                        Nous présentons plusieurs modèles d’extraction de topics dans le but de trouver le 
+                        modèle correspondant le mieux aux données.",style="color:black"),
+                        width=8,style="background-color:lavender;border-radius: 10px")),
+             br(),
               fluidRow(column(width=2),align="center",
                        column(8,
                               br(),

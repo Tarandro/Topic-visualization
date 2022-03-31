@@ -459,6 +459,20 @@ observeEvent(input$button_modele, {
 },ignoreNULL = FALSE,ignoreInit = TRUE)
 
 observeEvent({input$change_topic}, {
+  
+  description_modele <- list()
+  description_modele["top2vec"] <- "Combinaison d’un modèle d’embedding puis d’une méthode de réduction de dimension et 
+                                    enfin un algorithme de clustering par densité"
+  description_modele["bert_hdbscan"] <- "Combinaison d’un modèle d’embedding (bert) puis d’une méthode de réduction de dimension et 
+                                         enfin un algorithme de clustering par densité (hdbscan)"
+  description_modele["nmf_frobenius"] <- "NMF (Factorisation par matrices non négatives) consiste à trouver 2 matrices non négatives 
+                                          dont le produit est une approximation de la matrice TF-IDF (matrice termes – documents).
+                                          L'approximation est effectuée par la fonction de coût 'Frobenius'"
+  description_modele["nmf_kullback"] <- "NMF (Factorisation par matrices non négatives) consiste à trouver 2 matrices non négatives 
+                                         dont le produit est une approximation de la matrice TF-IDF (matrice termes – documents).
+                                         L'approximation est effectuée par la fonction de divergence 'kullback'"
+  description_modele["blend_model"] <- "Applique une agrégation de topics avec tous les topics des autres modèles."
+  
   info_df <- reactiveValues(data = data.frame(
     
     Modèle = shinyInput(actionButton, length(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$modele), 
@@ -466,33 +480,22 @@ observeEvent({input$change_topic}, {
                         label = as.character(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$modele),
                        onclick = 'Shiny.onInputChange(\"button_modele\",  this.id)',
                        style='text-align:center;width: 100%;background-color:rgba(153,51,204,0.5);color:black;border-radius: 12px;border: 2px solid #000000'),
-    Fonction_de_perte = as.character(round(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$value,3))  #valeurs
+    
+    Description = mapply(function(x){if (x %in% names(description_modele)) {return(description_modele[[x]])} else {return("")}},
+                         datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$modele),
+    
+    Fonction_de_perte = as.character(round(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$value,3))
   ))
+  
+  colnames(info_df$data) <- gsub("Fonction_de_perte", "Fonction de perte", colnames(info_df$data))
   
   #Dataframe des modèles avec leur fonction de perte
   output$methodes <- DT::renderDataTable(
-    info_df$data, server = FALSE, escape = FALSE, selection = 'none',
+    info_df$data, server = FALSE, escape = FALSE, selection = 'none', rownames= FALSE,
     options = list(lengthChange = FALSE, paging = FALSE, info = FALSE,searching = FALSE,
-                   ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = 1:2)))
+                   ordering = FALSE,columnDefs = list(list(className = 'dt-center', targets = c(0,2))))
   )
 },ignoreNULL = FALSE,ignoreInit = FALSE)
-# output$methodes <- renderUI({
-#   out=tagList()
-#   df_score = df_informations[which(df_informations$infos == "fct_perte"),]
-#   df_score = df_score[order(-df_score$valeurs),]
-#   out=lapply(df_score$modele,  function(x){ 
-#     tagList(fluidRow(
-#       br(),
-#       actionButton(paste0("bouton_",x), HTML(paste('<pre>',x,get_value(df_score, x),'</pre>')), 
-#                   style='background-color:rgba(153,51,204,0.5)',
-#                   onclick = paste0("Shiny.setInputValue('button_modele',this.innerText);")
-#       )
-#     ),
-#     br())
-#     })
-#   
-#   out
-# })
 
 dataframe_labels = function(subset_label){
   "Affiche un dataframe avec en colonne chaque modèles et leurs labels ligne par ligne"
