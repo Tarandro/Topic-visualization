@@ -461,6 +461,7 @@ surligner_mots = function(nb_top_termes, lim_top_termes,label_i,df_document_vect
 
 output$exemple_docs <- renderText({
   dt_topics$df_document_vector_modele_cluster
+  input$select_nb_topterms
   isolate({
     label_i = dt_topics$df_label_modele_cluster
     df_document_vector_reactive = dt_topics$df_document_vector_modele_cluster

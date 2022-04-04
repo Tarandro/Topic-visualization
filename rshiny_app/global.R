@@ -68,7 +68,13 @@ for(name in name_dataset){
     dt$label <- mapply(function(x){return(strsplit(x, "_")[[1]][1])}, dt$label)
     dt <- dt[!((duplicated(dt[, c("label", "cluster", "modele")]) | duplicated (dt[, c("label", "cluster", "modele")], fromLast = TRUE)) & dt$choix == 0),]
     datas[[name]] <- dt
-  }else{
+  }
+  else if (name == "df_document_vector") {
+    dt <- read.csv(paste0(path,name,'.csv'))
+    dt[["annotated"]] <- ""
+    datas[[name]] <- dt
+  }
+  else{
     datas[[name]] <- read.csv(paste0(path,name,'.csv'))
   }
 }

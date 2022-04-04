@@ -10,7 +10,8 @@ dashboardPage(
       menuItem("Hierarchy", tabName = "hierarchy"),
       menuItem("Documents", tabName = "documents"),
       menuItem("Visualisation", tabName = "visualisation"),
-      menuItem("Dataset", tabName = "dataset")
+      menuItem("Dataset", tabName = "dataset"),
+      menuItem("Annotation", tabName = "annotation")
     )
   ),
   
@@ -35,7 +36,10 @@ dashboardPage(
               source("./src/ui/ui_visualisation.R", encoding = "UTF-8")$value),
       
       tabItem(tabName = "dataset",
-              source("./src/ui/ui_dataset.R", encoding = "UTF-8")$value)
+              source("./src/ui/ui_dataset.R", encoding = "UTF-8")$value),
+      
+      tabItem(tabName = "annotation",
+              source("./src/ui/ui_annotation.R", encoding = "UTF-8")$value)
       
     )
   )

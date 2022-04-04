@@ -68,7 +68,7 @@ example_documents = function(lim_top_termes, subset_df_label, subset_df_document
   message = ""
   nb_example = 0
   idx_text = 1
-  while(nb_example < 5 & idx_text < length(subset_df_text)) {
+  while(nb_example < 5 & idx_text <= length(subset_df_text)) {
     text_split = str_split(subset_df_text[idx_text], ' ')[[1]]
     
     text_lemmatize = copy(text_split)

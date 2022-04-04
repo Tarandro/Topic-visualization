@@ -56,4 +56,17 @@ Visualization of topics from different topic models with R Shiny
 
 **Visualisation :**
 
-- [ ] Supprimer nombre de documents par thème et date
+- [x] Supprimer nombre de documents par thème et date
+
+
+**Annotation :**
+
+- [ ] TOP : Bouton de chaque topics pour sélectionner les documents les plus associés à ce topic
+
+- [ ] LEFT : Bouton de chaque topics pour surligner (classé par proba)
+
+- [ ] RIGHT : un texte pré-surligner (comme dans Documents) et pouvoir surligner avec la souris
+
+- [ ] Sauvegarder jeu de données avec une nouvelle colonne : HTML TEXT
+
+- [ ] Lancer Viz avec ce jeu de données
