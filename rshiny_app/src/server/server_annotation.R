@@ -1,21 +1,30 @@
 dt_ann = reactiveValues(label_df_modele_choix = NULL, df_word_cluster_tf_modele = NULL, df_document_vector_modele = NULL, df_document_vector_modele_sample = NULL,
-                        select_button_ann = FALSE, list_highlights = list(), df_annotated_modele_sample = NULL, no_highlights = NULL)
+                        select_button_ann = NULL, list_highlights = list(), df_annotated_modele_sample = NULL, no_highlights = NULL,
+                        highlight_top_terms = list(), start_popup1 = TRUE, start_popup2 = 100)
 
 # udpate si on change de label pour un topic
 observeEvent({input$Choix_modele_ann
   input$boutons_label
   input$change_topic}, {
+    
     dt_ann$label_df_modele_choix = subset(dt_topics$label_df_choix, modele == input$Choix_modele_ann)
     dt_ann$df_word_cluster_tf_modele = subset(datas$df_word_cluster_tf, modele == input$Choix_modele_ann)
     dt_ann$df_document_vector_modele = subset(datas$df_document_vector, modele == input$Choix_modele_ann)
+    
+    dt <- datas$dataset_preprocessed[which(datas$dataset_preprocessed$body_as_anonymised != ""),][, c("body_as_text", "body_as_anonymised")]
+    colnames(dt) <- c("body_as_text", "terms_non_pre")
+    dt_ann$df_document_vector_modele<-merge(x=dt_ann$df_document_vector_modele,y=dt,by="terms_non_pre",all.x=TRUE)
 
     output$ui_max_topic <- renderUI({
       sliderInput("select_max_topic_ann", label = "Limite du nombre de top topics", min = 1, 
                   max = length(dt_ann$label_df_modele_choix$label), value = length(dt_ann$label_df_modele_choix$label), round = T, step = 1)
     })
     
-    
   },priority = 2,ignoreNULL = FALSE,ignoreInit = FALSE)
+
+observeEvent(input$Choix_modele_ann, {
+  dt_ann$highlight_top_terms <- list()
+},priority = 2,ignoreNULL = FALSE,ignoreInit = FALSE)
 
 # sélectionne le bouton rerun
 observeEvent({input$bouton_rerun_ann
@@ -48,7 +57,7 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
   
   columns_names = paste0('X',subset_df_label$cluster)
   subset_df_document_vector_col = subset_df_document_vector[,columns_names]
-  subset_df_text =  subset_df_document_vector[,1]
+  subset_df_text =  subset_df_document_vector$body_as_text
   number_line = rownames(subset_df_document_vector)[1]
   
   message_button = ""
@@ -57,10 +66,14 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
   idx_text = 1
   while(nb_example < 1 & idx_text <= length(subset_df_text)) {
     text_split = str_split(subset_df_text[idx_text], ' ')[[1]]
+    text_split[text_split != ""]
     
     text_lemmatize = copy(text_split)
-    for (word in 1:length(text_split)) {
-      text_lemmatize[word] = subset(df_lemma, token == text_split[word])$lem[1]
+    for (i in 1:length(text_split)) {
+      word <- tolower(text_split[i])
+      word <- gsub('[[:punct:] ]+',' ',word)
+      word <- stringr::str_trim(word, "both")
+      text_lemmatize[i] = subset(df_lemma, token == word)$lem[1]
     }
     
     color = rep('',length(text_split))
@@ -72,7 +85,7 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
     if (is.null(input$select_max_topic_ann)) {
       n_max_topics <- length(subset_df_label$label)
     }else{
-      n_max_topics <- input$select_max_topic_ann
+      n_max_topics <- min(length(subset_df_label$label), input$select_max_topic_ann)
     }
     
     for (nb_topic in 1:n_max_topics) {
@@ -101,7 +114,12 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
       # top terms à surligner
       df_word_cluster_i = df_word_cluster[,c('terms',columns_names[col])]
       df_word_cluster_i = df_word_cluster_i[order(-df_word_cluster_i[,columns_names[col]]),]
-      top_terms = df_word_cluster_i$terms[1:lim_top_termes]
+      
+      if (as.character(col) %in% names(dt_ann$highlight_top_terms)) {
+        top_terms = dt_ann$highlight_top_terms[[as.character(col)]]
+      }else{
+        top_terms = df_word_cluster_i$terms[1:lim_top_termes] 
+      }
         
       ## tri-grams :
       trigrams=3
@@ -217,7 +235,14 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
                 }
               }
               
-              if (ngrams == highlight_text) {
+              ngrams_without_punctuation <- gsub('[[:punct:] ]+',' ',ngrams)
+              ngrams_without_punctuation <- stringr::str_trim(ngrams_without_punctuation, "both")
+              
+              highlight_text_without_punctuation <- gsub('[[:punct:] ]+',' ',highlight_text)
+              highlight_text_without_punctuation <- stringr::str_trim(highlight_text_without_punctuation, "both")
+              
+              if (tolower(ngrams) == tolower(highlight_text) || tolower(ngrams_without_punctuation) == tolower(highlight_text) ||
+                  tolower(ngrams_without_punctuation) == tolower(highlight_text_without_punctuation)) {
                 for (idx in i:j) {
                   color[idx] = all_color[as.integer(col)]
                 }
@@ -258,8 +283,14 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
                   }
                 }
               }
+              ngrams_without_punctuation <- gsub('[[:punct:] ]+',' ',ngrams)
+              ngrams_without_punctuation <- stringr::str_trim(ngrams_without_punctuation, "both")
               
-              if (ngrams == no_highlight_text) {
+              no_highlight_text_without_punctuation <- gsub('[[:punct:] ]+',' ',no_highlight_text)
+              no_highlight_text_without_punctuation <- stringr::str_trim(no_highlight_text_without_punctuation, "both")
+              
+              if (tolower(ngrams) == tolower(no_highlight_text) || tolower(ngrams_without_punctuation) == tolower(no_highlight_text)||
+                  tolower(ngrams_without_punctuation) == tolower(no_highlight_text_without_punctuation)) {
                 for (idx in i:j) {
                   color[idx] = ''
                 }
@@ -280,8 +311,20 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
       for (j in 1:length(text_split)) {
         message_text = paste(message_text,' ')
         message_text = paste0(message_text,"<span style='background:",color[j],";font-family:monospace'>")
-        message_text = paste0(message_text,text_split[j])
+        
+        text_to_highlight <- text_split[j]
+        text_not_to_highlight <- ""
+        if (color[j] != "") {
+          while (length(text_to_highlight) > 0 & str_sub(text_to_highlight,-1,-1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
+            text_not_to_highlight <- paste0(str_sub(text_to_highlight,-1, -1), text_not_to_highlight)
+            text_to_highlight <- str_sub(text_to_highlight,0, -2)
+          }
+        }
+        message_text = paste0(message_text, text_to_highlight)
         message_text = paste0(message_text,"</span>")
+        if (text_not_to_highlight != "") {
+          message_text = paste0(message_text,"<span style='background:","",";font-family:monospace'>",text_not_to_highlight,"</span>")
+        }
       }
       message_text = paste0(message_text,"</font></span>")
       
@@ -300,7 +343,7 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
 observeEvent(c(input$bouton_rerun_ann,input$Choix_modele_ann, input$bouton_save_ann),{
   dt_ann$list_highlights <- list()
   dt_ann$no_highlights <- NULL
-    
+  
   # input$select_lim_top_termes_ann
   l <- button_topic(100, dt_ann$label_df_modele_choix, dt_ann$df_document_vector_modele_sample,
                     dt_ann$df_word_cluster_tf_modele, dt_ann$list_highlights, dt_ann$no_highlights)
@@ -319,25 +362,27 @@ observeEvent(c(input$bouton_rerun_ann,input$Choix_modele_ann, input$bouton_save_
 
 
 observeEvent(input$select_button_ann, {
-  dt_ann$select_button_ann = TRUE
   
   highlight_text <- input$mydata
   
+  # remove space at the start and end
+  highlight_text <- stringr::str_trim(highlight_text, "both")
+  
   # remove space/punctuation at the start and end
-  while (length(highlight_text) > 0 & substr(highlight_text,1,1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
-    highlight_text <- substr(highlight_text,2,nchar(highlight_text))
-  }
-  while (length(highlight_text) > 0 & str_sub(highlight_text,-1,-1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
-    highlight_text <- str_sub(highlight_text,0, -2)
-  }
+  highlight_text_without_punctuation <- gsub('[[:punct:] ]+',' ',highlight_text)
+  highlight_text_without_punctuation <- stringr::str_trim(highlight_text_without_punctuation, "both")
   
   if (nchar(highlight_text) > 0) {
     
     # Remove highlight_text for each topic:
     for (idx in names(dt_ann$list_highlights)) {
-      dt_ann$list_highlights[[idx]] <- dt_ann$list_highlights[[idx]][dt_ann$list_highlights[[idx]] != highlight_text]
+      dt_ann$list_highlights[[idx]] <- dt_ann$list_highlights[[idx]][!(dt_ann$list_highlights[[idx]] %in% c(highlight_text,highlight_text_without_punctuation))]
     }
-    dt_ann$no_highlights <- dt_ann$no_highlights[dt_ann$no_highlights != highlight_text]
+    dt_ann$no_highlights <- dt_ann$no_highlights[!(dt_ann$no_highlights %in% c(highlight_text,highlight_text_without_punctuation))]
+    # Any no_highlight has to contain the word :
+    dt_ann$no_highlights <- stringr::str_trim(unlist(str_split(dt_ann$no_highlights, highlight_text)), "both")
+    dt_ann$no_highlights <- stringr::str_trim(unlist(str_split(dt_ann$no_highlights, highlight_text_without_punctuation)), "both")
+    
     
     # Add highlight_text to the selected topic
     idx_label <- which(dt_ann$label_df_modele_choix == input$select_button_ann)
@@ -346,37 +391,85 @@ observeEvent(input$select_button_ann, {
     }else{
       dt_ann$list_highlights[[as.character(idx_label)]] <- highlight_text
     }
+    
+    l <- button_topic(100, dt_ann$label_df_modele_choix, dt_ann$df_document_vector_modele_sample,
+                      dt_ann$df_word_cluster_tf_modele, dt_ann$list_highlights, dt_ann$no_highlights)
+    
+    output$html_show_text <- renderText({
+      l$message_text
+    })
   }
-  
-  l <- button_topic(100, dt_ann$label_df_modele_choix, dt_ann$df_document_vector_modele_sample,
-                    dt_ann$df_word_cluster_tf_modele, dt_ann$list_highlights, dt_ann$no_highlights)
+  else{
+    idx_label <- which(dt_ann$label_df_modele_choix == input$select_button_ann)
+    columns_names = paste0('X',dt_ann$label_df_modele_choix$cluster)
+    df_word_cluster_i <- dt_ann$df_word_cluster_tf_modele[,c('terms',columns_names[idx_label])]
+    df_word_cluster_i <- df_word_cluster_i[order(-df_word_cluster_i[,columns_names[idx_label]]),]
+    top_terms <- df_word_cluster_i$terms[1:100]
+    if (idx_label %in% names(dt_ann$highlight_top_terms)) {
+      selected_top_terms <- dt_ann$highlight_top_terms[[as.character(idx_label)]]
+    }else{
+      selected_top_terms <- top_terms
+    }
 
-  output$html_show_text <- renderText({
-    l$message_text
-  })
+    # Pop-up to select top terms to highlight
+    showModal(modalDialog(
+      title = paste("TOPIC :", input$select_button_ann),
+      
+      sliderInput("select_lim_top_termes_ann", label = "Limite du nombre de top termes à surligner", min = 1, 
+                  max = 100, value = 100),  
+      
+      checkboxGroupInput("select_top_terms_to_highlight", "Top termes à surligner :",
+                   choices = top_terms, selected = selected_top_terms),
+      easyClose = TRUE
+    ))
+    
+    dt_ann$start_popup1 <- TRUE
+    dt_ann$start_popup2 <- 100
+    dt_ann$selected_button_ann <- input$select_button_ann
+  }
   
   session$sendCustomMessage(type = 'resetInputValue', message =  "select_button_ann")
   
 },priority = 5,ignoreNULL = TRUE,ignoreInit = TRUE)
+
+observeEvent(input$select_top_terms_to_highlight,{
+  idx_label <- which(dt_ann$label_df_modele_choix == dt_ann$selected_button_ann)
+  dt_ann$highlight_top_terms[[as.character(idx_label)]] <- input$select_top_terms_to_highlight
+})
+
+observeEvent(input$select_lim_top_termes_ann,{
+  
+  if (input$select_lim_top_termes_ann != dt_ann$start_popup2) {
+    idx_label <- which(dt_ann$label_df_modele_choix == dt_ann$selected_button_ann)
+    columns_names = paste0('X',dt_ann$label_df_modele_choix$cluster)
+    df_word_cluster_i = dt_ann$df_word_cluster_tf_modele[,c('terms',columns_names[idx_label])]
+    df_word_cluster_i = df_word_cluster_i[order(-df_word_cluster_i[,columns_names[idx_label]]),]
+    top_terms = df_word_cluster_i$terms[1:input$select_lim_top_termes_ann]
+    
+    #top_terms = top_terms[top_terms %in% input$select_top_terms_to_highlight]
+    dt_ann$start_popup2 <- input$select_lim_top_termes_ann
+    
+    updateCheckboxGroupInput(session, "select_top_terms_to_highlight", selected = top_terms)
+  }
+})
 
 
 observeEvent(input$bouton_white_ann, {
   
   highlight_text <- input$mydata
   
+  # remove space at the start and end
+  highlight_text <- stringr::str_trim(highlight_text, "both")
+  
   # remove space/punctuation at the start and end
-  while (length(highlight_text) > 0 & substr(highlight_text,1,1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
-    highlight_text <- substr(highlight_text,2,nchar(highlight_text))
-  }
-  while (length(highlight_text) > 0 & str_sub(highlight_text,-1,-1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
-    highlight_text <- str_sub(highlight_text,0, -2)
-  }
+  highlight_text_without_punctuation <- gsub('[[:punct:] ]+',' ',highlight_text)
+  highlight_text_without_punctuation <- stringr::str_trim(highlight_text_without_punctuation, "both")
   
   if (nchar(highlight_text) > 0) {
     
     # Remove highlight_text for each topic:
     for (idx in names(dt_ann$list_highlights)) {
-      dt_ann$list_highlights[[idx]] <- dt_ann$list_highlights[[idx]][dt_ann$list_highlights[[idx]] != highlight_text]
+      dt_ann$list_highlights[[idx]] <- dt_ann$list_highlights[[idx]][!(dt_ann$list_highlights[[idx]] %in% c(highlight_text, highlight_text_without_punctuation))]
     }
     
     # Add highlight_text to the null topic
@@ -393,11 +486,13 @@ observeEvent(input$bouton_white_ann, {
 },priority = 5,ignoreNULL = TRUE,ignoreInit = TRUE)
 
 
-observeEvent(c(input$select_max_topic_ann, input$boutons_label),{
+observeEvent(c(input$select_max_topic_ann, input$boutons_label, dt_ann$highlight_top_terms),{
   req(dt_ann$label_df_modele_choix)
   req(dt_ann$df_document_vector_modele_sample)
+  
   l <- button_topic(100, dt_ann$label_df_modele_choix, dt_ann$df_document_vector_modele_sample, 
                     dt_ann$df_word_cluster_tf_modele, dt_ann$list_highlights, dt_ann$no_highlights)
+  
   output$html_button_topic <- renderText({
     l$message_button
   })
@@ -474,8 +569,7 @@ annotated_examples = function(lim_top_termes, subset_df_label, subset_df_documen
 
 observeEvent(c(input$bouton_rerun_ann_ex,input$Choix_modele_ann, input$bouton_save_ann),{
   dt_ann$list_highlights <- list()
-  
-  message <- annotated_examples(input$select_lim_top_termes_ann, dt_ann$label_df_modele_choix, dt_ann$df_annotated_modele_sample)
+  message <- annotated_examples(100, dt_ann$label_df_modele_choix, dt_ann$df_annotated_modele_sample)
   
   output$example_documents_ann <- renderText({message})
   
