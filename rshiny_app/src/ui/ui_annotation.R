@@ -29,12 +29,17 @@ tabItem(
       column(2,
              pickerInput("Choix_modele_ann", "Modèle", as.vector(unique(top_topic_terms$modele)),selected = as.vector(unique(top_topic_terms$modele))[1])
       ),
-      column(2),
-      column(4,
+      column(1),
+      column(3,
              uiOutput("ui_max_topic")       
       ),
+      column(2),
       column(2,
              actionButton("bouton_rerun_ann", "Autres exemples", style='height:60px')
+             , style = "margin-top: 30px;"
+      ),
+      column(2,
+             actionButton("bouton_save_all_ann", "Tout sauvegarder", style='height:60px')
              , style = "margin-top: 30px;"
       ),
     ),

@@ -35,8 +35,11 @@ observeEvent({input$bouton_rerun_ann
     dt_ann$df_document_vector_modele_sample = dt_ann$df_document_vector_modele_sample[which(dt_ann$df_document_vector_modele_sample$annotated == ""),]
     if (nrow(dt_ann$df_document_vector_modele_sample) > 0) {
       dt_ann$df_document_vector_modele_sample = dt_ann$df_document_vector_modele_sample[sample(1:length(dt_ann$df_document_vector_modele_sample$terms)),]
+    }else{
+      dt_ann$df_document_vector_modele_sample = dt_ann$df_document_vector_modele[nchar(dt_ann$df_document_vector_modele$terms_non_pre) > mean(nchar(dt_ann$df_document_vector_modele$terms_non_pre)),]
+      dt_ann$df_document_vector_modele_sample = dt_ann$df_document_vector_modele_sample[sample(1:length(dt_ann$df_document_vector_modele_sample$terms)),]
     }
-    },priority = 1,ignoreNULL = FALSE,ignoreInit = FALSE)
+  },priority = 1,ignoreNULL = FALSE,ignoreInit = FALSE)
 
 # observeEvent(input$select_button_doc, {
 #   dt_ann$select_button_doc = TRUE
@@ -49,7 +52,8 @@ observeEvent({input$bouton_rerun_ann
 
 #######################################################################################
 
-button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vector, df_word_cluster, highlights, no_highlights, save = FALSE){
+button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vector, df_word_cluster, highlights, no_highlights, save = FALSE,
+                        max_example = 1){
   
   if (nrow(subset_df_document_vector) == 0) {
     return(NULL)
@@ -58,15 +62,20 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
   columns_names = paste0('X',subset_df_label$cluster)
   subset_df_document_vector_col = subset_df_document_vector[,columns_names]
   subset_df_text =  subset_df_document_vector$body_as_text
-  number_line = rownames(subset_df_document_vector)[1]
-  
-  message_button = ""
-  message_text = ""
+
   nb_example = 0
   idx_text = 1
-  while(nb_example < 1 & idx_text <= length(subset_df_text)) {
+  while(nb_example < max_example & idx_text <= length(subset_df_text)) {
+    message_button = ""
+    message_text = ""
     text_split = str_split(subset_df_text[idx_text], ' ')[[1]]
     text_split[text_split != ""]
+    
+    number_line = rownames(subset_df_document_vector)[idx_text]
+    
+    if (nb_example%%100 == 1) {
+      print(paste(nb_example, "/", length(subset_df_text)))
+    }
     
     text_lemmatize = copy(text_split)
     for (i in 1:length(text_split)) {
@@ -305,36 +314,40 @@ button_topic = function(lim_top_termes, subset_df_label, subset_df_document_vect
     
     message_button = html
     
-    # sum_proba > 0.8 et au moins un mot surligner pour chaque topic :
-    if (sum_proba > 0.0) {
-      message_text = paste0(message_text," <br/> <br/> ","<span style='background-color:lavender'><Font size=+2>")
-      for (j in 1:length(text_split)) {
-        message_text = paste(message_text,' ')
-        message_text = paste0(message_text,"<span style='background:",color[j],";font-family:monospace'>")
-        
-        text_to_highlight <- text_split[j]
+    # surligner pour chaque topic :
+    message_text = paste0(message_text," <br/> <br/> ","<span style='background-color:lavender;font-family:monospace'><Font size=+2>")
+    for (j in 1:length(text_split)) {
+      message_text = paste(message_text,' ')
+      text_to_highlight <- text_split[j]
+
+      if (color[j] != "") {
+        message_text = paste0(message_text,"<span style='background:",color[j],"'>")
         text_not_to_highlight <- ""
-        if (color[j] != "") {
-          while (length(text_to_highlight) > 0 & str_sub(text_to_highlight,-1,-1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
-            text_not_to_highlight <- paste0(str_sub(text_to_highlight,-1, -1), text_not_to_highlight)
-            text_to_highlight <- str_sub(text_to_highlight,0, -2)
-          }
+        while (length(text_to_highlight) > 0 & str_sub(text_to_highlight,-1,-1) %in% c(" ", ".", ",", "?", ";", ":", "/", "!")) {
+          text_not_to_highlight <- paste0(str_sub(text_to_highlight,-1, -1), text_not_to_highlight)
+          text_to_highlight <- str_sub(text_to_highlight,0, -2)
         }
         message_text = paste0(message_text, text_to_highlight)
         message_text = paste0(message_text,"</span>")
         if (text_not_to_highlight != "") {
-          message_text = paste0(message_text,"<span style='background:","",";font-family:monospace'>",text_not_to_highlight,"</span>")
+          message_text = paste0(message_text,"<span style='background:","","'>",text_not_to_highlight,"</span>")
         }
-      }
-      message_text = paste0(message_text,"</font></span>")
-      
-      if (save) {
-        datas$df_document_vector[which(rownames(datas$df_document_vector) == number_line), which(colnames(datas$df_document_vector) == "annotated")] = message_text
-        dt_ann$df_document_vector_modele[which(rownames(dt_ann$df_document_vector_modele) == number_line), which(colnames(dt_ann$df_document_vector_modele) == "annotated")] = message_text
+      }else{
+        message_text = paste0(message_text, text_to_highlight)
       }
       
-      nb_example = nb_example + 1
     }
+    message_text = paste0(message_text,"</font></span>")
+      
+    if (save) {
+      datas$df_document_vector[which(rownames(datas$df_document_vector) == number_line), which(colnames(datas$df_document_vector) == "annotated")] = message_text
+      dt_ann$df_document_vector_modele[which(rownames(dt_ann$df_document_vector_modele) == number_line), which(colnames(dt_ann$df_document_vector_modele) == "annotated")] = message_text
+      if (nb_example > 0 & nb_example%%1000 == 0) {
+        write.csv(dt_ann$df_document_vector_modele[,c("body_as_text", "annotated", columns_names)], file = paste0(path, 'annotated_dataset.csv'))
+      }
+    }
+      
+    nb_example = nb_example + 1
     idx_text = idx_text + 1
   }
   return(list(message_button = HTML(message_button), message_text = HTML(message_text)))
@@ -509,6 +522,19 @@ observeEvent(input$bouton_save_ann,{
   
   l <- button_topic(100, dt_ann$label_df_modele_choix, dt_ann$df_document_vector_modele_sample, 
                     dt_ann$df_word_cluster_tf_modele, dt_ann$list_highlights, dt_ann$no_highlights, TRUE)
+  
+},priority = 10)
+
+
+observeEvent(input$bouton_save_all_ann,{
+  
+  l <- button_topic(100, dt_ann$label_df_modele_choix, dt_ann$df_document_vector_modele_sample, 
+                    dt_ann$df_word_cluster_tf_modele, dt_ann$list_highlights, dt_ann$no_highlights, TRUE,
+                    max_example = nrow(dt_ann$df_document_vector_modele_sample))
+  
+  columns_names = paste0('X',dt_ann$label_df_modele_choix$cluster)
+  
+  write.csv(dt_ann$df_document_vector_modele[,c("body_as_text", "annotated", columns_names)], file = paste0(path, 'annotated_dataset.csv'))
   
 },priority = 10)
 

@@ -502,6 +502,15 @@ observeEvent({input$change_topic}, {
                                          L'approximation est effectuée par la fonction de divergence 'kullback'"
   description_modele["blend_model"] <- "Applique une agrégation de topics avec tous les topics des autres modèles."
   
+  fct_description <- function(x) {
+    for (name_modele in names(description_modele)) {
+      if (grepl(name_modele, x)) {
+        return(description_modele[[name_modele]])
+      }
+    }
+    return("")
+  }
+  
   info_df <- reactiveValues(data = data.frame(
     
     Modèle = shinyInput(actionButton, length(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$modele), 
@@ -510,7 +519,7 @@ observeEvent({input$change_topic}, {
                        onclick = 'Shiny.onInputChange(\"button_modele\",  this.id)',
                        style='text-align:center;width: 100%;background-color:rgba(153,51,204,0.5);color:black;border-radius: 12px;border: 2px solid #000000'),
     
-    Description = mapply(function(x){if (x %in% names(description_modele)) {return(description_modele[[x]])} else {return("")}},
+    Description = mapply(function(x){return(fct_description(x))},
                          datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$modele),
     
     Fonction_de_perte = as.character(round(datas$df_informations[which(datas$df_informations$infos == "loss_fct"),]$value,3))
