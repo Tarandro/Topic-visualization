@@ -23,7 +23,7 @@ require(rsconnect)
 #deployApp("~/Documents/NLP-TopicModeling/Topic-visualization/rshiny_app")
 
 path = "CDP_hierar/"  # Tripadvisor_pos
-path = "C:/Users/AlexisGassmann/Documents/cdp_dataset/"
+#path = "C:/Users/AlexisGassmann/Documents/cdp_dataset/"
 
 
 df_label = read.csv(paste0(path,'df_label','.csv'))

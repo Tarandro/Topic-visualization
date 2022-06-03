@@ -25,6 +25,6 @@ Visualization of topics from different topic models with R Shiny
 
 **Modele :**
 
-- [ ] Revoir code topic Modeling et intégrer à R
+- [x] Revoir code topic Modeling et intégrer à R
 
-- [ ] Apprentisage supervisé après annotation
+- [x] Apprentisage supervisé après annotation

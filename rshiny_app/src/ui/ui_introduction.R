@@ -22,7 +22,7 @@ tabItem(
              p("L’extraction des topics est utilisée pour découvrir la structure sémantique d’une collection de documents. 
                Plusieurs méthodes d’extraction de topics existent mais l’environnement textuel sans labels et la variété 
                des styles textuels impliquent une difficulté dans l’automatisation et l’évaluation des extractions de topics. 
-               L'application permet de visualiser les différentes méthodes et d'aider l'utilisateur a comprendre ses topics.",style="text-align:left"),
+               L'application permet de visualiser les différentes méthodes et d'aider l'utilisateur à comprendre ses topics.",style="text-align:left"),
              br(),
              p("La labélisation de topics est une étape permettant de valoriser les topics en leur donnant un titre indicatif.",style="text-align:left"),
              width=8,style="background-color:lavender;border-radius: 10px")),
